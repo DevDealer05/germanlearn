@@ -751,6 +751,35 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
           </div>
         </div>
 
+        <div class="section-title">🔒 Betreuer-PIN ändern</div>
+        <div class="category-card" style="margin-bottom:16px;">
+          <div style="font-size:0.85rem; color:#666; margin-bottom:12px;">
+            Ändern Sie die 4-stellige PIN für den geschützten Zugang zu diesem Betreuer-Dashboard.
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div>
+              <label style="font-size:0.8rem; font-weight:600; color:#555; display:block; margin-bottom:4px;">Aktuelle PIN</label>
+              <input type="password" id="pin-current" inputmode="numeric" maxlength="4" placeholder="••••" class="form-input" style="letter-spacing:4px; font-size:1.1rem; width:100%;">
+            </div>
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;">
+                <label style="font-size:0.8rem; font-weight:600; color:#555; display:block; margin-bottom:4px;">Neue PIN (4 Ziffern)</label>
+                <input type="password" id="pin-new" inputmode="numeric" maxlength="4" placeholder="••••" class="form-input" style="letter-spacing:4px; font-size:1.1rem; width:100%;">
+              </div>
+              <div style="flex:1;">
+                <label style="font-size:0.8rem; font-weight:600; color:#555; display:block; margin-bottom:4px;">Wiederholen</label>
+                <input type="password" id="pin-repeat" inputmode="numeric" maxlength="4" placeholder="••••" class="form-input" style="letter-spacing:4px; font-size:1.1rem; width:100%;">
+              </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+              <div id="pin-change-status" style="font-size:0.85rem; font-weight:600;"></div>
+              <button class="btn-action" style="padding:8px 18px; font-size:0.85rem;" onclick="changeBetreuerPin()">
+                PIN speichern
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="section-title">Profil & Daten</div>
         <button class="btn-action btn-action-secondary" style="width:100%; margin-bottom:12px;" onclick="showEditProfile()">
           ✏️ Einrichtungs-Profil bearbeiten
@@ -905,7 +934,36 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
   <script src="js/lessons.js"></script>
 
   <script>
-    const BETREUER_PIN = '1234';
+    let currentBetreuerPin = '1234';
+
+    async function getBetreuerPin() {
+      // 1. Supabase Cloud Sync
+      if (window.SupaSync) {
+        const cloudPin = await SupaSync.get('betreuer_pin', null);
+        if (cloudPin && typeof cloudPin === 'string') {
+          currentBetreuerPin = cloudPin;
+          return cloudPin;
+        }
+      }
+      // 2. Local storage
+      const localPin = localStorage.getItem('betreuer_pin');
+      if (localPin) {
+        currentBetreuerPin = localPin;
+        return localPin;
+      }
+      // 3. Local server API
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.betreuerPin) {
+            currentBetreuerPin = data.betreuerPin;
+            return data.betreuerPin;
+          }
+        }
+      } catch (e) {}
+      return currentBetreuerPin;
+    }
 
     function setupPinInputs() {
       const inputs = document.querySelectorAll('#pin-fields input');
@@ -931,7 +989,9 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       const inputs = document.querySelectorAll('#pin-fields input');
       const pin = Array.from(inputs).map(i => i.value).join('');
 
-      if (pin === BETREUER_PIN) {
+      const validPin = await getBetreuerPin();
+
+      if (pin === validPin) {
         document.getElementById('login-screen').classList.add('hidden');
 
         const profile = await fetchProfile();
@@ -947,6 +1007,52 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
         inputs.forEach(i => i.value = '');
         inputs[0].focus();
       }
+    }
+
+    async function changeBetreuerPin() {
+      const currentInput = document.getElementById('pin-current').value.trim();
+      const newInput = document.getElementById('pin-new').value.trim();
+      const repeatInput = document.getElementById('pin-repeat').value.trim();
+      const statusEl = document.getElementById('pin-change-status');
+
+      const expectedPin = await getBetreuerPin();
+
+      if (currentInput !== expectedPin) {
+        statusEl.innerHTML = '<span style="color:var(--danger)">❌ Aktuelle PIN ist falsch</span>';
+        return;
+      }
+
+      if (!/^\d{4}$/.test(newInput)) {
+        statusEl.innerHTML = '<span style="color:var(--danger)">❌ Neue PIN muss genau 4 Ziffern sein</span>';
+        return;
+      }
+
+      if (newInput !== repeatInput) {
+        statusEl.innerHTML = '<span style="color:var(--danger)">❌ Neue PINs stimmen nicht überein</span>';
+        return;
+      }
+
+      currentBetreuerPin = newInput;
+      localStorage.setItem('betreuer_pin', newInput);
+
+      if (window.SupaSync) {
+        await SupaSync.set('betreuer_pin', newInput);
+      }
+
+      try {
+        const s = await fetchSettings();
+        s.betreuerPin = newInput;
+        await saveSettings(s);
+      } catch (e) {}
+
+      document.getElementById('pin-current').value = '';
+      document.getElementById('pin-new').value = '';
+      document.getElementById('pin-repeat').value = '';
+
+      statusEl.innerHTML = '<span style="color:var(--success)">✅ PIN erfolgreich geändert!</span>';
+      setTimeout(() => {
+        if (statusEl.textContent.includes('erfolgreich')) statusEl.textContent = '';
+      }, 5000);
     }
 
     // ─── Tabs ─────────────────────────────────────────────
