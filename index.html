@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f5f0eb">
+  <title>Deutsch Lernen</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       SETUP SCREEN (Ersteinrichtung Bewohner)
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-setup" class="screen">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:20px; text-align:center;">
+      <div style="font-size:4rem;">👋</div>
+      <div style="font-size:1.5rem; font-weight:700; color:#4a4a4a;">Willkommen!</div>
+      <div style="font-size:1rem; color:#888; max-width:280px;">Wie heißt du?</div>
+      <input type="text" id="setup-name" placeholder="Name eingeben..."
+        style="width:100%; max-width:280px; padding:16px 20px; font-size:1.2rem; border:2px solid #e0dbd6;
+        border-radius:16px; background:white; text-align:center; outline:none; color:#3a3a3a;"
+        onfocus="this.style.borderColor='#5b8db8'" onblur="this.style.borderColor='#e0dbd6'">
+      <button onclick="App.saveSetup()"
+        style="background:#5b8db8; color:white; border:none; border-radius:16px; padding:16px 48px;
+        font-size:1.1rem; font-weight:600; cursor:pointer; box-shadow:0 3px 12px rgba(91,141,184,0.25);">
+        ✓
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       HOME SCREEN
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-home" class="screen">
+    <div class="header">
+      <div class="header-title" id="home-title">📖 Deutsch Lernen</div>
+      <div style="width:48px"></div>
+    </div>
+
+    <div class="home-welcome">
+      <div class="home-welcome-emoji">👋</div>
+      <div class="home-welcome-text" id="home-greeting"></div>
+    </div>
+
+    <div id="streak-container" style="margin-bottom:8px;"></div>
+
+    <div class="category-grid" id="category-grid">
+      <!-- Dynamisch generiert -->
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       CATEGORY SCREEN
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-category" class="screen">
+    <div class="header">
+      <button class="btn-back" onclick="App.goHome()" aria-label="Zurück">←</button>
+      <div class="header-title"></div>
+      <div style="width:48px"></div>
+    </div>
+
+    <div class="category-header">
+      <span class="category-header-emoji" id="category-emoji"></span>
+    </div>
+
+    <div class="mode-buttons" id="mode-buttons">
+      <!-- Dynamisch generiert -->
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       LEARN SCREEN (Wörter)
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-learn" class="screen">
+    <div class="header">
+      <button class="btn-back" onclick="App.goBack()" aria-label="Zurück">←</button>
+      <div class="header-title">📖</div>
+      <div style="width:48px"></div>
+    </div>
+
+    <div class="learn-container">
+      <div class="learn-emoji" id="learn-emoji"></div>
+      <div class="learn-word-text" id="learn-word-text"></div>
+      <button class="btn-play" id="btn-play-learn" onclick="App.speakCurrentWord()" aria-label="Anhören">
+        🔊
+      </button>
+      <div class="learn-nav">
+        <button class="btn-nav" id="btn-prev" onclick="App.learnPrev()" aria-label="Zurück">←</button>
+        <span class="learn-counter" id="learn-counter"></span>
+        <button class="btn-nav" id="btn-next" onclick="App.learnNext()" aria-label="Weiter">→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       SENTENCES SCREEN (Sätze)
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-sentences" class="screen">
+    <div class="header">
+      <button class="btn-back" onclick="App.goBack()" aria-label="Zurück">←</button>
+      <div class="header-title">💬</div>
+      <div style="width:48px"></div>
+    </div>
+
+    <div class="sentence-container">
+      <div class="sentence-emojis" id="sentence-emojis"></div>
+      <div class="sentence-text" id="sentence-text"></div>
+      <button class="btn-play" id="btn-play-sentence" onclick="App.speakCurrentSentence()" aria-label="Anhören">
+        🔊
+      </button>
+      <div class="learn-nav">
+        <button class="btn-nav" id="btn-prev-sentence" onclick="App.sentencePrev()" aria-label="Zurück">←</button>
+        <span class="learn-counter" id="sentence-counter"></span>
+        <button class="btn-nav" id="btn-next-sentence" onclick="App.sentenceNext()" aria-label="Weiter">→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       QUIZ SCREEN
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-quiz" class="screen">
+    <div class="header">
+      <button class="btn-back" onclick="App.goBack()" aria-label="Zurück">←</button>
+      <div class="header-title">🎯</div>
+      <div style="width:48px"></div>
+    </div>
+
+    <div id="quiz-area" class="quiz-container">
+      <div class="quiz-prompt">
+        <button class="btn-play" onclick="App.replayQuizAudio()" aria-label="Nochmal hören" style="width: 60px; height: 60px; font-size: 1.6rem;">
+          🔊
+        </button>
+      </div>
+      <div class="quiz-options" id="quiz-options">
+        <!-- Dynamisch generiert -->
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+      <div class="quiz-progress" id="quiz-progress"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       GUIDES LIST SCREEN (Anleitungen-Übersicht)
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-guides-list" class="screen">
+    <div class="header">
+      <button class="btn-back" onclick="App.goHome()" aria-label="Zurück">←</button>
+      <div class="header-title">📋</div>
+      <div style="width:48px"></div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; padding:8px 0;" id="guides-list">
+      <!-- Dynamisch generiert -->
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       GUIDE STEP SCREEN (Schritt-für-Schritt-Anleitung)
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-guide" class="screen">
+    <div class="header">
+      <button class="btn-back" onclick="App.goHome()" aria-label="Zurück">←</button>
+      <div class="header-title" id="guide-title-emoji">📋</div>
+      <div style="width:48px"></div>
+    </div>
+
+    <div class="sentence-container" style="gap:16px;">
+      <!-- Step emojis (large) -->
+      <div class="sentence-emojis" id="guide-step-emojis" style="min-height:160px; font-size:4rem;"></div>
+
+      <!-- Step text -->
+      <div class="sentence-text" id="guide-step-text"></div>
+
+      <!-- Play button -->
+      <button class="btn-play" onclick="App.speakGuideStep()" aria-label="Anhören">🔊</button>
+
+      <!-- Progress bar -->
+      <div style="width:100%; max-width:300px;">
+        <div style="background:#e0dbd6; border-radius:8px; height:8px; overflow:hidden;">
+          <div id="guide-progress-fill" style="height:100%; background:#27ae60; border-radius:8px; transition:width 0.3s;"></div>
+        </div>
+        <div id="guide-counter" style="text-align:center; font-size:0.85rem; color:#999; margin-top:6px;"></div>
+      </div>
+
+      <!-- Next/Done button (large, friendly) -->
+      <button id="guide-next-btn" onclick="App.guideNext()"
+        style="width:80px; height:80px; border-radius:50%; border:none; background:#27ae60;
+        color:white; font-size:2rem; cursor:pointer; box-shadow:0 4px 16px rgba(39,174,96,0.3);
+        margin-top:8px;">
+        ✅
+      </button>
+    </div>
+  </div>
+
+  <!-- Supabase Cloud Sync -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+
+  <!-- Scripts -->
+  <script src="js/lessons.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

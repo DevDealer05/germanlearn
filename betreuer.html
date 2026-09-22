@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2c3e50">
+  <title>Betreuer Dashboard — Deutsch Lernen</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --text-secondary: #7f8c8d;
+      --primary: #3498db;
+      --primary-dark: #2980b9;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --border: #e8ecef;
+      --purple: #8e44ad;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* ─── Login & Setup ─────────────────────────────────────── */
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 36px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+    }
+
+    .login-card h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    .login-card p { color: var(--text-secondary); margin-bottom: 24px; font-size: 0.95rem; }
+
+    .pin-fields {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .pin-fields input {
+      width: 52px;
+      height: 60px;
+      text-align: center;
+      font-size: 1.6rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: #f8f9fa;
+      color: var(--text);
+      outline: none;
+      -moz-appearance: textfield;
+    }
+
+    .pin-fields input::-webkit-outer-spin-button,
+    .pin-fields input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+
+    .pin-fields input:focus { border-color: var(--primary); background: white; }
+
+    .pin-error-msg {
+      color: var(--danger);
+      font-size: 0.9rem;
+      min-height: 1.4rem;
+      margin-bottom: 12px;
+    }
+
+    .btn-login {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 40px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s;
+    }
+
+    .btn-login:active { background: var(--primary-dark); }
+
+    /* ─── Dashboard ────────────────────────────────── */
+    .dashboard { display: none; }
+    .dashboard.active { display: block; }
+    .login-screen.hidden { display: none; }
+
+    .top-bar {
+      background: #2c3e50;
+      color: white;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .top-bar h1 { font-size: 1.05rem; font-weight: 600; }
+    .top-bar-right { display: flex; align-items: center; gap: 12px; }
+
+    .btn-refresh {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-refresh:active { background: rgba(255,255,255,0.25); }
+
+    .last-refresh {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* ─── Tabs Navigation ──────────────────────────── */
+    .nav-tabs {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 52px;
+      z-index: 15;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .nav-tabs::-webkit-scrollbar { display: none; }
+
+    .nav-tab {
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border: none;
+      background: none;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .nav-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    .dashboard-content {
+      padding: 16px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* ─── Profile & Summary Cards ──────────────────── */
+    .category-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+      margin-top: 14px;
+    }
+
+    .summary-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .summary-card-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .summary-card-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin: 16px 0 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cat-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .cat-emoji { font-size: 1.6rem; }
+    .cat-info { flex: 1; }
+    .cat-name { font-weight: 600; font-size: 0.95rem; }
+    .cat-percent { font-size: 1.1rem; font-weight: 700; }
+
+    .cat-bar {
+      background: #eee;
+      border-radius: 6px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .cat-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.4s;
+    }
+
+    .cat-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .cat-stat { display: flex; align-items: center; gap: 4px; }
+    .cat-stat-icon { font-size: 0.9rem; }
+
+    /* ─── Buttons & Badges ─────────────────────────── */
+    .btn-action {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(52,152,219,0.25);
+      transition: transform 0.1s, opacity 0.15s;
+    }
+
+    .btn-action:active { transform: scale(0.98); }
+
+    .btn-action-ai {
+      background: linear-gradient(135deg, #8e44ad, #3498db);
+      color: white;
+      box-shadow: 0 2px 8px rgba(142,68,173,0.3);
+    }
+
+    .btn-action-secondary {
+      background: #e8ecef;
+      color: var(--text);
+      box-shadow: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #eee;
+      color: #666;
+    }
+
+    .badge-success { background: #e8f8f0; color: var(--success); }
+    .badge-ai { background: #f4ecf7; color: var(--purple); }
+
+    /* ─── Guide Card ───────────────────────────────── */
+    .guide-card {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .guide-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .guide-steps-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #f8f9fa;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+    }
+
+    .guide-step-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+    }
+
+    .guide-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e8ecef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    /* ─── Modals ───────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 18px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 { font-size: 1.15rem; font-weight: 600; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: #999;
+      padding: 4px;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: #fdfdfd;
+    }
+
+    .form-group { margin-bottom: 14px; }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .form-input:focus, .form-textarea:focus { border-color: var(--primary); }
+
+    .step-item-edit {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      background: #f8f9fa;
+      padding: 8px 12px;
+      border-radius: 10px;
+    }
+
+    .step-item-edit input {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .step-item-edit input:focus { border-color: var(--primary); }
+
+    /* ─── Settings ─────────────────────────────────── */
+    .setting-row {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .setting-label { font-size: 0.95rem; font-weight: 500; }
+    .setting-desc { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-track {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ccc;
+      border-radius: 28px;
+      transition: 0.3s;
+    }
+
+    .toggle-track:before {
+      position: absolute;
+      content: "";
+      height: 22px; width: 22px;
+      left: 3px; bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle input:checked + .toggle-track { background: var(--primary); }
+    .toggle input:checked + .toggle-track:before { transform: translateX(22px); }
+
+    .btn-reset {
+      background: white;
+      border: 2px solid var(--danger);
+      color: var(--danger);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-reset:active { background: #fef2f2; }
+
+    /* ─── Activity Log ─────────────────────────────── */
+    .activity-section { margin-top: 24px; margin-bottom: 40px; }
+
+    .activity-item {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+
+    .activity-icon { font-size: 1.2rem; }
+    .activity-text { flex: 1; color: var(--text-secondary); }
+    .activity-text strong { color: var(--text); }
+
+    /* ─── Responsive ───────────────────────────────── */
+    @media (max-width: 420px) {
+      .summary-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @supports (padding-top: env(safe-area-inset-top)) {
+      .top-bar { padding-top: calc(14px + env(safe-area-inset-top)); }
+      .dashboard-content {
+        padding-left: calc(16px + env(safe-area-inset-left));
+        padding-right: calc(16px + env(safe-area-inset-right));
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════ LOGIN ═══════════ -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <h1>🔒 Betreuer-Zugang</h1>
+      <p>Bitte PIN eingeben</p>
+      <div class="pin-fields" id="pin-fields">
+        <input type="number" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input type="number" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input type="number" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input type="number" inputmode="numeric" maxlength="1" autocomplete="off">
+      </div>
+      <div class="pin-error-msg" id="pin-error"></div>
+      <button class="btn-login" id="btn-login" onclick="checkPin()">Anmelden</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SETUP (Ersteinrichtung Betreuer) ═══════════ -->
+  <div class="login-screen hidden" id="setup-screen">
+    <div class="login-card" style="max-width:400px; text-align:left;">
+      <h1 style="text-align:center; margin-bottom:16px;">⚙️ Ersteinrichtung</h1>
+      <p style="text-align:center; margin-bottom:20px;">Bitte Daten der Einrichtung eingeben</p>
+
+      <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:#7f8c8d; font-weight:600;">Einrichtungsname</label>
+      <input type="text" id="setup-facility" placeholder="z.B. Haus Sonnenschein" class="form-input" style="margin-bottom:14px;">
+
+      <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:#7f8c8d; font-weight:600;">Wohnbereich</label>
+      <input type="text" id="setup-ward" placeholder="z.B. WB 2 / Erdgeschoss" class="form-input" style="margin-bottom:14px;">
+
+      <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:#7f8c8d; font-weight:600;">Betreuername</label>
+      <input type="text" id="setup-caretaker" placeholder="Ihr Name" class="form-input" style="margin-bottom:14px;">
+
+      <label style="display:block; margin-bottom:4px; font-size:0.85rem; color:#7f8c8d; font-weight:600;">Name des Bewohners</label>
+      <input type="text" id="setup-resident" placeholder="Vorname des Bewohners" class="form-input" style="margin-bottom:20px;">
+
+      <button class="btn-login" onclick="saveSetup()">✓ Speichern & starten</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ DASHBOARD ═══════════ -->
+  <div class="dashboard" id="dashboard">
+    <div class="top-bar">
+      <h1 id="dashboard-title">📊 Betreuer Dashboard</h1>
+      <div class="top-bar-right">
+        <span class="last-refresh" id="last-refresh"></span>
+        <button class="btn-refresh" onclick="loadDashboard()">🔄 Aktualisieren</button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('overview')">📊 Übersicht</button>
+      <button class="nav-tab" onclick="switchTab('guides')">📋 Anleitungen</button>
+      <button class="nav-tab" onclick="switchTab('custom-categories')">📚 Eigene Kategorien</button>
+      <button class="nav-tab" onclick="switchTab('settings')">⚙️ Einstellungen</button>
+    </div>
+
+    <div class="dashboard-content">
+
+      <!-- Profile Info Card -->
+      <div id="profile-card" class="category-card" style="margin-top:16px; margin-bottom:16px; display:none;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="font-size:2.5rem;">🏠</div>
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:1.05rem;" id="profile-facility"></div>
+            <div style="font-size:0.85rem; color:#7f8c8d;" id="profile-details"></div>
+          </div>
+          <button onclick="showEditProfile()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; padding:8px;">✏️</button>
+        </div>
+      </div>
+
+      <!-- ═══════════ TAB 1: ÜBERSICHT ═══════════ -->
+      <div id="tab-overview" class="tab-pane active">
+        <!-- Summary Row -->
+        <div class="summary-row" id="summary-row">
+          <div class="summary-card">
+            <div class="summary-card-value" id="total-words">0</div>
+            <div class="summary-card-label">Wörter gelernt</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-value" id="total-sentences">0</div>
+            <div class="summary-card-label">Sätze geübt</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-value" id="quiz-accuracy">—</div>
+            <div class="summary-card-label">Quiz-Genauigkeit</div>
+          </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="section-title">Fortschritt pro Kategorie</div>
+        <div id="categories-list"></div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+          <div class="section-title">Letzte Aktivität</div>
+          <div id="activity-list">
+            <div class="activity-item">
+              <span class="activity-icon">📭</span>
+              <span class="activity-text">Noch keine Aktivität</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ TAB 2: ANLEITUNGEN ═══════════ -->
+      <div id="tab-guides" class="tab-pane">
+        <div style="display:flex; gap:10px; margin: 16px 0; flex-wrap:wrap;">
+          <button class="btn-action btn-action-ai" onclick="openAiGuideModal()">
+            🤖 Plan mit KI importieren
+          </button>
+          <button class="btn-action btn-action-secondary" onclick="openManualGuideModal()">
+            ➕ Manuelle Anleitung
+          </button>
+        </div>
+
+        <div class="section-title">Vorhandene Anleitungen</div>
+        <div id="guides-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- ═══════════ TAB 3: EIGENE KATEGORIEN ═══════════ -->
+      <div id="tab-custom-categories" class="tab-pane">
+        <div style="margin: 16px 0;">
+          <button class="btn-action" onclick="openCustomCategoryModal()">
+            ➕ Neue Kategorie anlegen
+          </button>
+        </div>
+
+        <div class="section-title">Ihre eigenen Kategorien</div>
+        <div id="custom-categories-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- ═══════════ TAB 4: EINSTELLUNGEN ═══════════ -->
+      <div id="tab-settings" class="tab-pane">
+        <div class="section-title" style="margin-top:16px;">Allgemein</div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Text anzeigen</div>
+            <div class="setting-desc">Deutsches Wort unter dem Bild in der Bewohner-App</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-text" onchange="toggleSetting('showText', this.checked)">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="section-title">🤖 KI-Import (Google Gemini)</div>
+        <div class="category-card" style="margin-bottom:16px;">
+          <div style="font-size:0.9rem; color:#666; margin-bottom:12px;">
+            Hinterlegen Sie Ihren kostenlosen Google Gemini API-Key, um Reinigungs- und Dienstpläne per Foto oder Text automatisch in visuelle Anleitungen umzuwandeln.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gemini API-Key</label>
+            <input type="password" id="gemini-api-key" placeholder="AIzaSy..." class="form-input">
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:0.8rem; color:var(--primary); text-decoration:none;">
+              🔑 Kostenlosen Key bei Google holen →
+            </a>
+            <button class="btn-action" style="padding:8px 16px; font-size:0.85rem;" onclick="saveApiKey()">
+              Speichern
+            </button>
+          </div>
+          <div id="api-key-status" style="font-size:0.8rem; margin-top:8px; font-weight:600;"></div>
+        </div>
+
+        <div class="section-title">⚡ Supabase Cloud Sync</div>
+        <div class="category-card" style="margin-bottom:16px;">
+          <div style="font-size:0.9rem; color:#666; margin-bottom:10px;">
+            Synchronisiert alle Daten (Fortschritt, Anleitungen, Kategorien) über das Internet in Echtzeit (auch über Mobilfunk/LTE).
+          </div>
+          <div id="supabase-status" style="font-size:0.85rem; font-weight:600; margin-bottom:12px;"></div>
+          <div style="background:#f8f9fa; border-radius:10px; padding:12px; font-size:0.8rem; color:#555;">
+            <strong>SQL für Supabase SQL-Editor (einmalig):</strong>
+            <pre style="margin-top:6px; background:#fff; border:1px solid #e0e0e0; padding:8px; border-radius:6px; overflow-x:auto; font-size:0.75rem;">create table if not exists app_data (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+alter table app_data enable row level security;
+create policy "Allow all" on app_data for all using (true) with check (true);</pre>
+          </div>
+        </div>
+
+        <div class="section-title">Profil & Daten</div>
+        <button class="btn-action btn-action-secondary" style="width:100%; margin-bottom:12px;" onclick="showEditProfile()">
+          ✏️ Einrichtungs-Profil bearbeiten
+        </button>
+
+        <button class="btn-reset" onclick="resetProgress()">
+          ⚠️ Gesamten Lern-Fortschritt zurücksetzen
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ MODAL: KI-ANLEITUNG IMPORTIEREN ═══════════ -->
+  <div id="modal-ai-guide" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🤖 Plan mit KI importieren</h3>
+        <button class="modal-close" onclick="closeModal('modal-ai-guide')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:14px;">
+          Fügen Sie den Text Ihres Reinigungs- oder Dienstplans ein oder laden Sie ein Foto hoch. Die KI erstellt automatisch eine kindgerechte Schritt-für-Schritt-Anleitung mit Emojis.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Plan als Text einfügen</label>
+          <textarea id="ai-plan-text" class="form-textarea" rows="4" placeholder="z.B. Gemeinschaftsraumdienst: 1. Stühle hochstellen 2. Fegen 3. Wischen 4. Müll rausbringen..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Oder: Foto / Scan vom Plan hochladen</label>
+          <input type="file" id="ai-plan-image" accept="image/*" class="form-input" style="padding:6px;">
+        </div>
+
+        <button class="btn-action btn-action-ai" id="btn-run-ai" style="width:100%; margin-top:8px;" onclick="generateAiGuide()">
+          ✨ Mit KI analysieren & umwandeln
+        </button>
+
+        <div id="ai-loading" style="display:none; text-align:center; padding:16px; color:var(--purple); font-weight:600;">
+          ⏳ KI analysiert den Plan... bitte warten...
+        </div>
+
+        <!-- Preview Area after AI generation -->
+        <div id="ai-guide-preview" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
+          <h4 style="margin-bottom:12px; font-size:0.95rem;">Vorschau & Bearbeiten</h4>
+
+          <div class="form-group" style="display:flex; gap:10px;">
+            <div style="width:70px;">
+              <label class="form-label">Emoji</label>
+              <input type="text" id="ai-preview-emoji" class="form-input" style="text-align:center; font-size:1.4rem;">
+            </div>
+            <div style="flex:1;">
+              <label class="form-label">Titel der Anleitung</label>
+              <input type="text" id="ai-preview-title" class="form-input">
+            </div>
+          </div>
+
+          <label class="form-label">Schritte</label>
+          <div id="ai-preview-steps"></div>
+          <button class="btn-action btn-action-secondary" style="font-size:0.8rem; padding:6px 12px; margin-top:6px;" onclick="addStepToAiPreview()">
+            ➕ Weiteren Schritt hinzufügen
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action btn-action-secondary" onclick="closeModal('modal-ai-guide')">Abbrechen</button>
+        <button class="btn-action" id="btn-save-ai-guide" style="display:none;" onclick="saveAiGuide()">✓ Anleitung speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MODAL: MANUELLE ANLEITUNG ERSTELLEN ═══════════ -->
+  <div id="modal-manual-guide" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>➕ Neue Anleitung erstellen</h3>
+        <button class="modal-close" onclick="closeModal('modal-manual-guide')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="display:flex; gap:10px;">
+          <div style="width:70px;">
+            <label class="form-label">Emoji</label>
+            <input type="text" id="manual-guide-emoji" placeholder="🧹" class="form-input" style="text-align:center; font-size:1.4rem;">
+          </div>
+          <div style="flex:1;">
+            <label class="form-label">Titel</label>
+            <input type="text" id="manual-guide-title" placeholder="z.B. Wäschedienst" class="form-input">
+          </div>
+        </div>
+
+        <label class="form-label">Schritte (Emojis + Kurzer deutscher Text)</label>
+        <div id="manual-steps-list"></div>
+        <button class="btn-action btn-action-secondary" style="font-size:0.8rem; padding:6px 12px; margin-top:6px;" onclick="addStepToManualGuide()">
+          ➕ Schritt hinzufügen
+        </button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action btn-action-secondary" onclick="closeModal('modal-manual-guide')">Abbrechen</button>
+        <button class="btn-action" onclick="saveManualGuide()">✓ Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MODAL: EIGENE KATEGORIE ANLEGEN ═══════════ -->
+  <div id="modal-custom-category" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📚 Neue Kategorie anlegen</h3>
+        <button class="modal-close" onclick="closeModal('modal-custom-category')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="display:flex; gap:10px;">
+          <div style="width:70px;">
+            <label class="form-label">Emoji</label>
+            <input type="text" id="cat-new-emoji" placeholder="🎨" class="form-input" style="text-align:center; font-size:1.4rem;">
+          </div>
+          <div style="flex:1;">
+            <label class="form-label">Name der Kategorie</label>
+            <input type="text" id="cat-new-name" placeholder="z.B. Farben oder Garten" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Wörter (Emoji + Deutsches Wort)</label>
+          <div id="cat-new-words"></div>
+          <button class="btn-action btn-action-secondary" style="font-size:0.8rem; padding:6px 12px; margin-top:6px;" onclick="addWordToCustomCat()">
+            ➕ Wort hinzufügen
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Einfache Sätze (Emojis + Deutscher Satz)</label>
+          <div id="cat-new-sentences"></div>
+          <button class="btn-action btn-action-secondary" style="font-size:0.8rem; padding:6px 12px; margin-top:6px;" onclick="addSentenceToCustomCat()">
+            ➕ Satz hinzufügen
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action btn-action-secondary" onclick="closeModal('modal-custom-category')">Abbrechen</button>
+        <button class="btn-action" onclick="saveCustomCategory()">✓ Kategorie speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Cloud Sync -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+
+  <!-- Scripts -->
+  <script src="js/lessons.js"></script>
+
+  <script>
+    const BETREUER_PIN = '1234';
+
+    function setupPinInputs() {
+      const inputs = document.querySelectorAll('#pin-fields input');
+      inputs.forEach((input, i) => {
+        input.addEventListener('input', () => {
+          if (input.value.length === 1 && i < inputs.length - 1) {
+            inputs[i + 1].focus();
+          }
+          if (i === inputs.length - 1 && input.value.length === 1) {
+            checkPin();
+          }
+        });
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && input.value === '' && i > 0) {
+            inputs[i - 1].focus();
+          }
+        });
+      });
+      setTimeout(() => inputs[0].focus(), 200);
+    }
+
+    async function checkPin() {
+      const inputs = document.querySelectorAll('#pin-fields input');
+      const pin = Array.from(inputs).map(i => i.value).join('');
+
+      if (pin === BETREUER_PIN) {
+        document.getElementById('login-screen').classList.add('hidden');
+
+        const profile = await fetchProfile();
+        if (!profile.facilityName) {
+          document.getElementById('setup-screen').classList.remove('hidden');
+          document.getElementById('setup-facility').focus();
+        } else {
+          document.getElementById('dashboard').classList.add('active');
+          loadDashboard();
+        }
+      } else if (pin.length === 4) {
+        document.getElementById('pin-error').textContent = 'Falsche PIN';
+        inputs.forEach(i => i.value = '');
+        inputs[0].focus();
+      }
+    }
+
+    // ─── Tabs ─────────────────────────────────────────────
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+      const targetPane = document.getElementById('tab-' + tabId);
+      if (targetPane) targetPane.classList.add('active');
+
+      const tabs = document.querySelectorAll('.nav-tab');
+      tabs.forEach(t => {
+        if (t.getAttribute('onclick').includes(tabId)) {
+          t.classList.add('active');
+        }
+      });
+
+      if (tabId === 'guides') renderGuides();
+      if (tabId === 'custom-categories') renderCustomCategories();
+      if (tabId === 'settings') loadSettingsTab();
+    }
+
+    // ─── Modal Helpers ────────────────────────────────────
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // ─── Profile ──────────────────────────────────────────
+    async function fetchProfile() {
+      if (window.SupaSync) {
+        const cloudP = await SupaSync.get('profile', null);
+        if (cloudP && cloudP.facilityName) return cloudP;
+      }
+      try {
+        const res = await fetch('/api/profile');
+        if (res.ok) return await res.json();
+      } catch (e) {}
+      return {};
+    }
+
+    async function saveProfileData(data) {
+      if (window.SupaSync) {
+        SupaSync.set('profile', data);
+      }
+      try {
+        await fetch('/api/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      } catch (e) {}
+    }
+
+    async function saveSetup() {
+      const facility = document.getElementById('setup-facility').value.trim();
+      const ward = document.getElementById('setup-ward').value.trim();
+      const caretaker = document.getElementById('setup-caretaker').value.trim();
+      const resident = document.getElementById('setup-resident').value.trim();
+
+      if (!facility || !resident) {
+        alert('Bitte mindestens Einrichtungsname und Bewohnername eingeben.');
+        return;
+      }
+
+      const profile = { facilityName: facility, wardName: ward, caretakerName: caretaker, residentName: resident };
+      await saveProfileData(profile);
+
+      document.getElementById('setup-screen').classList.add('hidden');
+      document.getElementById('dashboard').classList.add('active');
+      loadDashboard();
+    }
+
+    function showEditProfile() {
+      fetchProfile().then(profile => {
+        document.getElementById('setup-facility').value = profile.facilityName || '';
+        document.getElementById('setup-ward').value = profile.wardName || '';
+        document.getElementById('setup-caretaker').value = profile.caretakerName || '';
+        document.getElementById('setup-resident').value = profile.residentName || '';
+
+        document.getElementById('dashboard').classList.remove('active');
+        document.getElementById('setup-screen').classList.remove('hidden');
+      });
+    }
+
+    function renderProfileCard(profile) {
+      const card = document.getElementById('profile-card');
+      if (!profile.facilityName) {
+        card.style.display = 'none';
+        return;
+      }
+      card.style.display = 'block';
+      document.getElementById('profile-facility').textContent = profile.facilityName;
+
+      const parts = [];
+      if (profile.wardName) parts.push(profile.wardName);
+      if (profile.residentName) parts.push('Bewohner: ' + profile.residentName);
+      if (profile.caretakerName) parts.push('Betreuer: ' + profile.caretakerName);
+      document.getElementById('profile-details').textContent = parts.join(' · ');
+
+      if (profile.residentName) {
+        document.getElementById('dashboard-title').textContent = `📊 ${profile.residentName} — Dashboard`;
+      }
+    }
+
+    // ─── API Helper (Supabase Cloud + Local Server) ────────
+    async function fetchProgress() {
+      if (window.SupaSync) {
+        const cloudProgress = await SupaSync.get('progress', null);
+        if (cloudProgress) return cloudProgress;
+      }
+      try {
+        const res = await fetch('/api/progress');
+        if (res.ok) return await res.json();
+      } catch (e) {}
+      return { words: {}, sentences: {}, quizScores: {}, totalSessions: 0, lastSessionDate: null };
+    }
+
+    async function saveProgress(progress) {
+      if (window.SupaSync) {
+        SupaSync.set('progress', progress);
+      }
+      try {
+        await fetch('/api/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(progress)
+        });
+      } catch (e) {}
+    }
+
+    async function fetchSettings() {
+      if (window.SupaSync) {
+        const cloudSettings = await SupaSync.get('settings', null);
+        if (cloudSettings) return cloudSettings;
+      }
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) return await res.json();
+      } catch (e) {}
+      return { showText: true };
+    }
+
+    async function saveSettings(settings) {
+      if (window.SupaSync) {
+        SupaSync.set('settings', settings);
+      }
+      try {
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(settings)
+        });
+      } catch (e) {}
+    }
+
+    async function fetchConfig() {
+      let cfg = {};
+      try {
+        const res = await fetch('/api/config');
+        if (res.ok) cfg = await res.json();
+      } catch (e) {}
+      if (!cfg.geminiApiKey) {
+        const localKey = localStorage.getItem('gemini_api_key');
+        if (localKey) cfg.geminiApiKey = localKey;
+      }
+      return cfg;
+    }
+
+    async function saveConfig(cfg) {
+      if (cfg.geminiApiKey) {
+        localStorage.setItem('gemini_api_key', cfg.geminiApiKey);
+      } else {
+        localStorage.removeItem('gemini_api_key');
+      }
+      try {
+        await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cfg)
+        });
+      } catch (e) {}
+    }
+
+    async function fetchGuides() {
+      if (window.SupaSync) {
+        const cloudGuides = await SupaSync.get('guides', null);
+        if (cloudGuides && cloudGuides.length > 0) return cloudGuides;
+      }
+      try {
+        const res = await fetch('/api/guides');
+        if (res.ok) return await res.json();
+      } catch (e) {}
+      return [];
+    }
+
+    async function saveGuides(guides) {
+      if (window.SupaSync) {
+        SupaSync.set('guides', guides);
+      }
+      try {
+        await fetch('/api/guides', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(guides)
+        });
+      } catch (e) {}
+    }
+
+    async function fetchCustomCategories() {
+      if (window.SupaSync) {
+        const cloudCats = await SupaSync.get('custom-categories', null);
+        if (cloudCats !== null) return cloudCats;
+      }
+      try {
+        const res = await fetch('/api/custom-categories');
+        if (res.ok) return await res.json();
+      } catch (e) {}
+      return [];
+    }
+
+    async function saveCustomCategories(categories) {
+      if (window.SupaSync) {
+        SupaSync.set('custom-categories', categories);
+      }
+      try {
+        await fetch('/api/custom-categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(categories)
+        });
+      } catch (e) {}
+    }
+
+    // ─── Tab 1: Overview Rendering ────────────────────────
+    const CATEGORY_NAMES = {
+      greetings: 'Begrüßung & Höflichkeit',
+      food: 'Essen & Trinken',
+      home: 'Alltag & Zuhause',
+      hygiene: 'Körperpflege & Kleidung',
+      chores: 'Wohnbereichsaufgaben',
+      feelings: 'Gefühle & Gesundheit',
+      numbers: 'Zahlen',
+      phrases: 'Wichtige Sätze',
+      outandabout: 'Unterwegs & Einkaufen',
+      timweather: 'Zeit & Wetter',
+      activities: 'Aktivitäten'
+    };
+
+    async function loadDashboard() {
+      const progress = await fetchProgress();
+      const settings = await fetchSettings();
+      const profile = await fetchProfile();
+      const customCats = await fetchCustomCategories();
+
+      renderProfileCard(profile);
+
+      // Merge standard + custom categories
+      const allCategories = [...CATEGORIES, ...customCats];
+
+      let totalWords = 0, totalSentences = 0, quizTotal = 0, quizCorrect = 0;
+
+      allCategories.forEach(cat => {
+        (cat.words || []).forEach(w => {
+          if (progress.words[w.id] && progress.words[w.id].learned) totalWords++;
+        });
+        (cat.sentences || []).forEach(s => {
+          if (progress.sentences[s.id] && progress.sentences[s.id].learned) totalSentences++;
+        });
+        const qs = progress.quizScores[cat.id];
+        if (qs) {
+          quizTotal += qs.total;
+          quizCorrect += qs.correct;
+        }
+      });
+
+      document.getElementById('total-words').textContent = totalWords;
+      document.getElementById('total-sentences').textContent = totalSentences;
+      document.getElementById('quiz-accuracy').textContent =
+        quizTotal > 0 ? Math.round((quizCorrect / quizTotal) * 100) + '%' : '—';
+
+      const list = document.getElementById('categories-list');
+      list.innerHTML = '';
+
+      allCategories.forEach(cat => {
+        const words = cat.words || [];
+        const sentences = cat.sentences || [];
+        const allItems = [...words, ...sentences];
+        if (allItems.length === 0) return;
+
+        let learned = 0;
+        words.forEach(w => {
+          if (progress.words[w.id] && progress.words[w.id].learned) learned++;
+        });
+        const sentencesLearned = sentences.filter(s =>
+          progress.sentences[s.id] && progress.sentences[s.id].learned
+        ).length;
+        learned += sentencesLearned;
+
+        const percent = Math.round((learned / allItems.length) * 100);
+        const qs = progress.quizScores[cat.id] || { total: 0, correct: 0, lastDate: null };
+        const quizPct = qs.total > 0 ? Math.round((qs.correct / qs.total) * 100) : null;
+        const wordsLearned = words.filter(w => progress.words[w.id] && progress.words[w.id].learned).length;
+
+        const color = cat.color || '#3498db';
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        card.innerHTML = `
+          <div class="cat-header">
+            <span class="cat-emoji">${cat.emoji}</span>
+            <div class="cat-info">
+              <div class="cat-name">${CATEGORY_NAMES[cat.id] || cat.name || cat.id}</div>
+            </div>
+            <div class="cat-percent" style="color: ${color}">${percent}%</div>
+          </div>
+          <div class="cat-bar">
+            <div class="cat-bar-fill" style="width: ${percent}%; background: ${color}"></div>
+          </div>
+          <div class="cat-stats">
+            ${words.length > 0 ? `<span class="cat-stat"><span class="cat-stat-icon">📖</span>${wordsLearned}/${words.length} Wörter</span>` : ''}
+            ${sentences.length > 0 ? `<span class="cat-stat"><span class="cat-stat-icon">💬</span>${sentencesLearned}/${sentences.length} Sätze</span>` : ''}
+            ${quizPct !== null ? `<span class="cat-stat"><span class="cat-stat-icon">🎯</span>${quizPct}% (${qs.total}×)</span>` : ''}
+            ${qs.lastDate ? `<span class="cat-stat"><span class="cat-stat-icon">📅</span>${qs.lastDate}</span>` : ''}
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      renderActivity(progress, allCategories);
+
+      document.getElementById('last-refresh').textContent =
+        'Aktualisiert: ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderActivity(progress, allCategories) {
+      const allWordsWithTime = [];
+      for (const [id, data] of Object.entries(progress.words || {})) {
+        if (data.lastSeen) {
+          let wordInfo = null;
+          for (const cat of allCategories) {
+            const w = (cat.words || []).find(w => w.id === id);
+            if (w) { wordInfo = { ...w, catEmoji: cat.emoji }; break; }
+          }
+          if (wordInfo) {
+            allWordsWithTime.push({ ...wordInfo, lastSeen: data.lastSeen, quizCorrect: data.quizCorrect || 0 });
+          }
+        }
+      }
+
+      allWordsWithTime.sort((a, b) => b.lastSeen - a.lastSeen);
+      const activityList = document.getElementById('activity-list');
+
+      if (allWordsWithTime.length === 0) {
+        activityList.innerHTML = `<div class="activity-item"><span class="activity-icon">📭</span><span class="activity-text">Noch keine Aktivität vorhanden</span></div>`;
+        return;
+      }
+
+      activityList.innerHTML = '';
+      const recentWords = allWordsWithTime.slice(0, 10);
+      recentWords.forEach(w => {
+        const timeAgo = getTimeAgo(w.lastSeen);
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        item.innerHTML = `
+          <span class="activity-icon">${w.emoji}</span>
+          <span class="activity-text">
+            <strong>${w.german}</strong> gelernt
+            ${w.quizCorrect > 0 ? `· ${w.quizCorrect}× im Quiz richtig` : ''}
+          </span>
+          <span style="font-size: 0.75rem; color: #aaa;">${timeAgo}</span>
+        `;
+        activityList.appendChild(item);
+      });
+    }
+
+    function getTimeAgo(timestamp) {
+      const diff = Date.now() - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      if (minutes < 1) return 'gerade';
+      if (minutes < 60) return `${minutes} Min.`;
+      if (hours < 24) return `${hours} Std.`;
+      return `${days} Tag${days > 1 ? 'e' : ''}`;
+    }
+
+    // ─── Tab 2: Guides ────────────────────────────────────
+    async function renderGuides() {
+      const container = document.getElementById('guides-container');
+      const guides = await fetchGuides();
+
+      if (guides.length === 0) {
+        container.innerHTML = `<div class="category-card" style="text-align:center; color:#888;">Noch keine Anleitungen vorhanden. Erstellen Sie eine neue Anleitung!</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      guides.forEach((g, idx) => {
+        const card = document.createElement('div');
+        card.className = 'guide-card';
+        card.innerHTML = `
+          <div class="guide-card-header">
+            <span style="font-size:2rem;">${g.emoji || '📋'}</span>
+            <div style="flex:1;">
+              <div style="font-weight:700; font-size:1rem;">${g.title}</div>
+              <div style="font-size:0.8rem; color:#888;">${(g.steps || []).length} Einzelschritte</div>
+            </div>
+            <button onclick="deleteGuide(${idx})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.1rem; padding:6px;" title="Löschen">🗑️</button>
+          </div>
+          <div class="guide-steps-preview">
+            ${(g.steps || []).map((s, sIdx) => `
+              <div class="guide-step-row">
+                <span class="guide-step-num">${sIdx + 1}</span>
+                <span style="font-size:1.2rem;">${(s.emojis || []).join(' ')}</span>
+                <span style="font-size:0.85rem; color:#444;">${s.german}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function deleteGuide(index) {
+      if (!confirm('Möchten Sie diese Anleitung wirklich löschen?')) return;
+      const guides = await fetchGuides();
+      guides.splice(index, 1);
+      await saveGuides(guides);
+      renderGuides();
+    }
+
+    // Manual Guide Creation
+    function openManualGuideModal() {
+      document.getElementById('manual-guide-title').value = '';
+      document.getElementById('manual-guide-emoji').value = '📋';
+      const stepsList = document.getElementById('manual-steps-list');
+      stepsList.innerHTML = '';
+      addStepToManualGuide('🧤', 'Handschuhe anziehen');
+      addStepToManualGuide('🧹', 'Boden fegen');
+      addStepToManualGuide('✅', 'Fertig! Gut gemacht!');
+      openModal('modal-manual-guide');
+    }
+
+    function addStepToManualGuide(emojis = '', text = '') {
+      const container = document.getElementById('manual-steps-list');
+      const div = document.createElement('div');
+      div.className = 'step-item-edit';
+      div.innerHTML = `
+        <input type="text" placeholder="Emojis (z.B. 🧽)" value="${emojis}" style="width:110px;" class="step-emojis">
+        <input type="text" placeholder="Deutscher Text" value="${text}" style="flex:1;" class="step-text">
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#bbb; cursor:pointer; font-size:1.2rem;">✕</button>
+      `;
+      container.appendChild(div);
+    }
+
+    async function saveManualGuide() {
+      const title = document.getElementById('manual-guide-title').value.trim();
+      const emoji = document.getElementById('manual-guide-emoji').value.trim() || '📋';
+      if (!title) { alert('Bitte einen Titel eingeben'); return; }
+
+      const stepRows = document.querySelectorAll('#manual-steps-list .step-item-edit');
+      const steps = [];
+      stepRows.forEach(row => {
+        const emojisRaw = row.querySelector('.step-emojis').value.trim();
+        const text = row.querySelector('.step-text').value.trim();
+        if (text) {
+          const emojiArray = emojisRaw ? Array.from(emojisRaw) : ['👉'];
+          steps.push({ emojis: emojiArray, german: text });
+        }
+      });
+
+      if (steps.length === 0) { alert('Bitte mindestens einen Schritt anlegen.'); return; }
+
+      const newGuide = {
+        id: 'guide_' + Date.now(),
+        title,
+        emoji,
+        steps
+      };
+
+      const guides = await fetchGuides();
+      guides.push(newGuide);
+      await saveGuides(guides);
+
+      closeModal('modal-manual-guide');
+      renderGuides();
+    }
+
+    // ─── AI Guide Import ──────────────────────────────────
+    function openAiGuideModal() {
+      document.getElementById('ai-plan-text').value = '';
+      document.getElementById('ai-plan-image').value = '';
+      document.getElementById('ai-guide-preview').style.display = 'none';
+      document.getElementById('btn-save-ai-guide').style.display = 'none';
+      document.getElementById('ai-loading').style.display = 'none';
+      openModal('modal-ai-guide');
+    }
+
+    async function callGeminiDirect(apiKey, userText, imageData) {
+      const prompt = "Du bist ein Experte in der Sozialpsychiatrie. Erstelle aus den bereitgestellten Aufgaben/Reinigungsplan eine extrem einfache, visuelle Schritt-für-Schritt-Anleitung für einen Bewohner mit kognitiven Einschränkungen und Schizophrenie.\n" +
+        "Anforderungen:\n" +
+        "1. Jeder Schritt MUSS sehr kurz und einfach sein (maximal 3-5 Wörter auf Deutsch).\n" +
+        "2. Jeder Schritt MUSS 1-3 passende, klare Emojis haben.\n" +
+        "3. Der letzte Schritt sollte immer 'Fertig! Gut gemacht!' mit Emoji ['✅'] sein.\n" +
+        "4. Gebe ein passendes Haupt-Emoji für die Gesamtaufgabe an.\n\n" +
+        "Antworte AUSSCHLIESSLICH im folgenden JSON-Format ohne Markdown-Formatierung:\n" +
+        "{\n" +
+        '  "title": "Kurzer, klarer Titel der Aufgabe",\n' +
+        '  "emoji": "🛋️",\n' +
+        '  "steps": [\n' +
+        '    {"emojis": ["🪑", "⬆️"], "german": "Stühle hochstellen"},\n' +
+        '    {"emojis": ["🧹"], "german": "Boden fegen"},\n' +
+        '    {"emojis": ["✅"], "german": "Fertig! Gut gemacht!"}\n' +
+        "  ]\n" +
+        "}";
+
+      const parts = [{ text: prompt }];
+      if (userText) parts.push({ text: `Aufgaben-Plan:\n${userText}` });
+      if (imageData) {
+        let mimeType = 'image/jpeg';
+        let b64Content = imageData;
+        if (imageData.includes(',')) {
+          const split = imageData.split(',');
+          const m = split[0].match(/data:([^;]+);base64/);
+          if (m) mimeType = m[1];
+          b64Content = split[1];
+        }
+        parts.push({ inline_data: { mime_type: mimeType, data: b64Content } });
+      }
+
+      const payload = {
+        contents: [{ parts }],
+        generationConfig: {
+          temperature: 0.2,
+          response_mime_type: 'application/json'
+        }
+      };
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`Google API HTTP ${resp.status}: ${errText}`);
+      }
+      const respData = await resp.json();
+      const pList = respData?.candidates?.[0]?.content?.parts || [];
+      let text = '';
+      for (let i = pList.length - 1; i >= 0; i--) {
+        if (pList[i].text && pList[i].text.trim()) {
+          text = pList[i].text;
+          break;
+        }
+      }
+      text = text.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+      const guide = JSON.parse(text);
+      if (!guide.id) guide.id = 'guide_' + Date.now();
+      return { ok: true, guide };
+    }
+
+    async function generateAiGuide() {
+      const text = document.getElementById('ai-plan-text').value.trim();
+      const fileInput = document.getElementById('ai-plan-image');
+      const file = fileInput.files[0];
+
+      if (!text && !file) {
+        alert('Bitte geben Sie Plan-Text ein oder wählen Sie ein Bild aus.');
+        return;
+      }
+
+      document.getElementById('ai-loading').style.display = 'block';
+      document.getElementById('btn-run-ai').disabled = true;
+
+      let imageData = '';
+      if (file) {
+        imageData = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      try {
+        let data = null;
+        try {
+          const res = await fetch('/api/ai/generate-guide', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, image: imageData })
+          });
+          if (res.ok) {
+            data = await res.json();
+          }
+        } catch (e) {}
+
+        // Fallback: direct Gemini call if backend endpoint is unavailable (e.g. Cloudflare Pages)
+        if (!data || !data.ok) {
+          const cfg = await fetchConfig();
+          const key = cfg.geminiApiKey || 'AQ.Ab8RN6JhpjDBh_RP138UTkDHmJtMMBZ0fNOaizBLBH3iHutUDg';
+          if (!key) throw new Error('Kein API-Key vorhanden. Bitte in Einstellungen eintragen.');
+          data = await callGeminiDirect(key, text, imageData);
+        }
+
+        document.getElementById('ai-loading').style.display = 'none';
+        document.getElementById('btn-run-ai').disabled = false;
+
+        if (!data || !data.ok || data.error) {
+          alert('Fehler: ' + (data?.error || 'Generierung fehlgeschlagen'));
+          return;
+        }
+
+        const guide = data.guide;
+        document.getElementById('ai-preview-title').value = guide.title || 'Aufgabe';
+        document.getElementById('ai-preview-emoji').value = guide.emoji || '📋';
+
+        const stepsContainer = document.getElementById('ai-preview-steps');
+        stepsContainer.innerHTML = '';
+        (guide.steps || []).forEach(step => {
+          const emojisStr = (step.emojis || []).join('');
+          addStepToAiPreview(emojisStr, step.german);
+        });
+
+        document.getElementById('ai-guide-preview').style.display = 'block';
+        document.getElementById('btn-save-ai-guide').style.display = 'inline-block';
+
+      } catch (err) {
+        document.getElementById('ai-loading').style.display = 'none';
+        document.getElementById('btn-run-ai').disabled = false;
+        alert('Verbindungsfehler: ' + err.message);
+      }
+    }
+
+    function addStepToAiPreview(emojis = '', text = '') {
+      const container = document.getElementById('ai-preview-steps');
+      const div = document.createElement('div');
+      div.className = 'step-item-edit';
+      div.innerHTML = `
+        <input type="text" value="${emojis}" placeholder="Emojis" style="width:110px;" class="step-emojis">
+        <input type="text" value="${text}" placeholder="Deutscher Schritt" style="flex:1;" class="step-text">
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#bbb; cursor:pointer; font-size:1.2rem;">✕</button>
+      `;
+      container.appendChild(div);
+    }
+
+    async function saveAiGuide() {
+      const title = document.getElementById('ai-preview-title').value.trim();
+      const emoji = document.getElementById('ai-preview-emoji').value.trim() || '📋';
+      if (!title) { alert('Bitte einen Titel eingeben'); return; }
+
+      const stepRows = document.querySelectorAll('#ai-preview-steps .step-item-edit');
+      const steps = [];
+      stepRows.forEach(row => {
+        const emojisRaw = row.querySelector('.step-emojis').value.trim();
+        const text = row.querySelector('.step-text').value.trim();
+        if (text) {
+          const emojiArray = emojisRaw ? Array.from(emojisRaw) : ['👉'];
+          steps.push({ emojis: emojiArray, german: text });
+        }
+      });
+
+      if (steps.length === 0) { alert('Bitte mindestens einen Schritt anlegen.'); return; }
+
+      const newGuide = {
+        id: 'guide_' + Date.now(),
+        title,
+        emoji,
+        steps
+      };
+
+      const guides = await fetchGuides();
+      guides.push(newGuide);
+      await saveGuides(guides);
+
+      closeModal('modal-ai-guide');
+      renderGuides();
+      alert('✅ Anleitung erfolgreich gespeichert! Der Bewohner kann sie jetzt in der App sehen.');
+    }
+
+    // ─── Tab 3: Custom Categories ─────────────────────────
+    async function renderCustomCategories() {
+      const container = document.getElementById('custom-categories-container');
+      const cats = await fetchCustomCategories();
+
+      if (cats.length === 0) {
+        container.innerHTML = `<div class="category-card" style="text-align:center; color:#888;">Noch keine eigenen Kategorien angelegt. Legen Sie neue Wörter und Sätze für Ihren Bewohner an!</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      cats.forEach((cat, idx) => {
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        card.innerHTML = `
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+            <span style="font-size:2rem;">${cat.emoji}</span>
+            <div style="flex:1;">
+              <div style="font-weight:700; font-size:1.05rem;">${cat.name}</div>
+              <div style="font-size:0.8rem; color:#888;">
+                ${(cat.words || []).length} Wörter · ${(cat.sentences || []).length} Sätze
+              </div>
+            </div>
+            <button onclick="deleteCustomCategory(${idx})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.1rem; padding:6px;" title="Löschen">🗑️</button>
+          </div>
+          <div style="font-size:0.85rem; color:#666;">
+            <strong>Wörter:</strong> ${(cat.words || []).map(w => `${w.emoji} ${w.german}`).join(' · ') || 'keine'}
+          </div>
+          ${(cat.sentences || []).length > 0 ? `
+            <div style="font-size:0.85rem; color:#666; margin-top:4px;">
+              <strong>Sätze:</strong> ${(cat.sentences || []).map(s => `${(s.emojis || []).join('')} ${s.german}`).join(' · ')}
+            </div>
+          ` : ''}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openCustomCategoryModal() {
+      document.getElementById('cat-new-name').value = '';
+      document.getElementById('cat-new-emoji').value = '🌟';
+      document.getElementById('cat-new-words').innerHTML = '';
+      document.getElementById('cat-new-sentences').innerHTML = '';
+
+      addWordToCustomCat('🎨', 'Farbe');
+      addWordToCustomCat('🖌️', 'Pinsel');
+      addSentenceToCustomCat('🎨', 'Ich möchte malen');
+
+      openModal('modal-custom-category');
+    }
+
+    function addWordToCustomCat(emoji = '', text = '') {
+      const container = document.getElementById('cat-new-words');
+      const div = document.createElement('div');
+      div.className = 'step-item-edit';
+      div.innerHTML = `
+        <input type="text" placeholder="Emoji" value="${emoji}" style="width:70px; text-align:center;" class="word-emoji">
+        <input type="text" placeholder="Deutsches Wort" value="${text}" style="flex:1;" class="word-text">
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#bbb; cursor:pointer; font-size:1.2rem;">✕</button>
+      `;
+      container.appendChild(div);
+    }
+
+    function addSentenceToCustomCat(emojis = '', text = '') {
+      const container = document.getElementById('cat-new-sentences');
+      const div = document.createElement('div');
+      div.className = 'step-item-edit';
+      div.innerHTML = `
+        <input type="text" placeholder="Emojis" value="${emojis}" style="width:110px;" class="sent-emojis">
+        <input type="text" placeholder="Deutscher Satz" value="${text}" style="flex:1;" class="sent-text">
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#bbb; cursor:pointer; font-size:1.2rem;">✕</button>
+      `;
+      container.appendChild(div);
+    }
+
+    async function saveCustomCategory() {
+      const name = document.getElementById('cat-new-name').value.trim();
+      const emoji = document.getElementById('cat-new-emoji').value.trim() || '🌟';
+      if (!name) { alert('Bitte einen Namen für die Kategorie eingeben'); return; }
+
+      const wordRows = document.querySelectorAll('#cat-new-words .step-item-edit');
+      const words = [];
+      wordRows.forEach((row, i) => {
+        const wEmoji = row.querySelector('.word-emoji').value.trim() || '⭐';
+        const wText = row.querySelector('.word-text').value.trim();
+        if (wText) {
+          words.push({ id: 'custom_w_' + Date.now() + '_' + i, german: wText, emoji: wEmoji });
+        }
+      });
+
+      const sentRows = document.querySelectorAll('#cat-new-sentences .step-item-edit');
+      const sentences = [];
+      sentRows.forEach((row, i) => {
+        const sEmojisRaw = row.querySelector('.sent-emojis').value.trim();
+        const sText = row.querySelector('.sent-text').value.trim();
+        if (sText) {
+          const sEmojiArray = sEmojisRaw ? Array.from(sEmojisRaw) : ['👉'];
+          sentences.push({ id: 'custom_s_' + Date.now() + '_' + i, german: sText, emojis: sEmojiArray });
+        }
+      });
+
+      if (words.length === 0 && sentences.length === 0) {
+        alert('Bitte mindestens ein Wort oder einen Satz hinzufügen.');
+        return;
+      }
+
+      const colors = ['#8e44ad', '#16a085', '#d35400', '#2980b9', '#27ae60', '#f39c12'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+      const newCategory = {
+        id: 'cat_' + Date.now(),
+        name,
+        emoji,
+        color: randomColor,
+        words,
+        sentences
+      };
+
+      const cats = await fetchCustomCategories();
+      cats.push(newCategory);
+      await saveCustomCategories(cats);
+
+      closeModal('modal-custom-category');
+      renderCustomCategories();
+      alert('✅ Kategorie gespeichert! Sie ist ab sofort in der Bewohner-App sichtbar.');
+    }
+
+    async function deleteCustomCategory(index) {
+      if (!confirm('Möchten Sie diese Kategorie wirklich löschen?')) return;
+      const cats = await fetchCustomCategories();
+      cats.splice(index, 1);
+      await saveCustomCategories(cats);
+      renderCustomCategories();
+    }
+
+    // ─── Tab 4: Settings & API Key ────────────────────────
+    async function loadSettingsTab() {
+      const settings = await fetchSettings();
+      document.getElementById('toggle-text').checked = settings.showText !== false;
+
+      const config = await fetchConfig();
+      const keyField = document.getElementById('gemini-api-key');
+      const statusEl = document.getElementById('api-key-status');
+
+      if (config.geminiApiKey) {
+        keyField.value = config.geminiApiKey;
+        statusEl.innerHTML = `<span style="color:var(--success)">✅ API-Key gespeichert & aktiv</span>`;
+      } else {
+        keyField.value = '';
+        statusEl.innerHTML = `<span style="color:var(--text-secondary)">ℹ️ Noch kein API-Key gespeichert</span>`;
+      }
+
+      // Supabase status
+      const supaStatusEl = document.getElementById('supabase-status');
+      if (supaStatusEl) {
+        if (window.SupaSync && SupaSync.isReady) {
+          supaStatusEl.innerHTML = `<span style="color:var(--success)">✅ Supabase Cloud aktiv (https://tujzmaqtatlvmwzjcdlk.supabase.co)</span>`;
+        } else {
+          supaStatusEl.innerHTML = `<span style="color:var(--warning)">ℹ️ Supabase bereit</span>`;
+        }
+      }
+    }
+
+    async function saveApiKey() {
+      const key = document.getElementById('gemini-api-key').value.trim();
+      const config = await fetchConfig();
+      config.geminiApiKey = key;
+      await saveConfig(config);
+
+      const statusEl = document.getElementById('api-key-status');
+      if (key) {
+        statusEl.innerHTML = `<span style="color:var(--success)">✅ API-Key erfolgreich gespeichert!</span>`;
+      } else {
+        statusEl.innerHTML = `<span style="color:var(--text-secondary)">ℹ️ API-Key entfernt</span>`;
+      }
+    }
+
+    async function toggleSetting(key, value) {
+      const settings = await fetchSettings();
+      settings[key] = value;
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      });
+    }
+
+    async function resetProgress() {
+      if (!confirm('⚠️ Wirklich den gesamten Lern-Fortschritt zurücksetzen?\n\nAlle gelernten Wörter und Quiz-Ergebnisse werden gelöscht.')) return;
+      if (!confirm('Sind Sie absolut sicher?')) return;
+
+      await fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ words: {}, sentences: {}, quizScores: {}, totalSessions: 0, lastSessionDate: null })
+      });
+      loadDashboard();
+      alert('Fortschritt wurde zurückgesetzt.');
+    }
+
+    // ─── Auto-Refresh ─────────────────────────────────────
+    let refreshInterval = null;
+    function startAutoRefresh() {
+      refreshInterval = setInterval(() => {
+        const overviewTab = document.getElementById('tab-overview');
+        if (overviewTab && overviewTab.classList.contains('active')) {
+          loadDashboard();
+        }
+      }, 30000);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.SupaSync) {
+        await SupaSync.init();
+      }
+      setupPinInputs();
+      startAutoRefresh();
+    });
+  </script>
+</body>
+</html>

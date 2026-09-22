@@ -1,0 +1,6 @@
+{
+  "supabaseUrl": "https://tujzmaqtatlvmwzjcdlk.supabase.co",
+  "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1anptYXF0YXRsdm13empjZGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwOTg0MTQsImV4cCI6MjEwNTY3NDQxNH0.l4wT3P2u6ZCNdnkCWlihCdgWsDjtwXrC5dxIlQnaJAo",
+  "supabaseServiceKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1anptYXF0YXRsdm13empjZGxrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDA5ODQxNCwiZXhwIjoyMTA1Njc0NDE0fQ.acknbzkW4BbF4xxWt_yFXJ08aRKeFYNmAfVwPTHKVUg",
+  "geminiApiKey": "AQ.Ab8RN6JhpjDBh_RP138UTkDHmJtMMBZ0fNOaizBLBH3iHutUDg"
+}
