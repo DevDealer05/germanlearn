@@ -109,27 +109,37 @@ const App = (() => {
   // ─── HOME SCREEN ───────────────────────────────────────────────────
   let customCategories = [];
   let guides = [];
+  let categoryPermissions = {};
 
   async function loadCustomData() {
     // 1. Try Supabase cloud first
     if (window.SupaSync) {
-      const [cloudCats, cloudGuides] = await Promise.all([
+      const [cloudCats, cloudGuides, cloudPerms] = await Promise.all([
         SupaSync.get('custom-categories', null),
-        SupaSync.get('guides', null)
+        SupaSync.get('guides', null),
+        SupaSync.get('category-permissions', null)
       ]);
       if (cloudCats !== null) customCategories = cloudCats;
       if (cloudGuides !== null) guides = cloudGuides;
+      if (cloudPerms !== null) categoryPermissions = cloudPerms;
     }
 
-    // 2. Fallback to local server if not loaded from cloud
-    if (customCategories.length === 0 || guides.length === 0) {
+    // 2. Fallback to local server / localStorage
+    try {
+      const [catRes, guideRes, permRes] = await Promise.all([
+        fetch('/api/custom-categories'),
+        fetch('/api/guides'),
+        fetch('/api/category-permissions')
+      ]);
+      if (catRes.ok && customCategories.length === 0) customCategories = await catRes.json();
+      if (guideRes.ok && guides.length === 0) guides = await guideRes.json();
+      if (permRes.ok && Object.keys(categoryPermissions).length === 0) categoryPermissions = await permRes.json();
+    } catch (e) {}
+
+    if (Object.keys(categoryPermissions).length === 0) {
       try {
-        const [catRes, guideRes] = await Promise.all([
-          fetch('/api/custom-categories'),
-          fetch('/api/guides')
-        ]);
-        if (catRes.ok && customCategories.length === 0) customCategories = await catRes.json();
-        if (guideRes.ok && guides.length === 0) guides = await guideRes.json();
+        const storedPerms = localStorage.getItem('category_permissions');
+        if (storedPerms) categoryPermissions = JSON.parse(storedPerms);
       } catch (e) {}
     }
   }
@@ -179,8 +189,13 @@ const App = (() => {
       grid.appendChild(guideBtn);
     }
 
-    // Category cards
-    const allCats = getAllCategories();
+    // Category cards (filtered by caretaker permissions)
+    const allCats = getAllCategories().filter(cat => {
+      if (!categoryPermissions || Object.keys(categoryPermissions).length === 0) return true;
+      const perm = categoryPermissions[cat.id];
+      if (perm === undefined) return true; // unlocked by default
+      return perm.unlocked !== false;
+    });
     allCats.forEach(cat => {
       const progress = Progress.getCategoryProgress(cat);
       const totalItems = (cat.words || []).length + (cat.sentences || []).length;
@@ -885,6 +900,10 @@ const App = (() => {
       SupaSync.subscribe('profile', (newProfile) => {
         profile = newProfile;
         applyProfile();
+      });
+      SupaSync.subscribe('category-permissions', (newPerms) => {
+        categoryPermissions = newPerms || {};
+        if (!currentCategory && !currentMode) renderHome();
       });
     }
 

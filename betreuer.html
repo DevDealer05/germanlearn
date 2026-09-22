@@ -547,6 +547,79 @@
     .activity-text { flex: 1; color: var(--text-secondary); }
     .activity-text strong { color: var(--text); }
 
+    /* ─── Staff & Audit Styles ─────────────────────── */
+    .staff-chip {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      color: #334155;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .staff-chip:hover { background: #e2e8f0; }
+    .staff-chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(52,152,219,0.3);
+    }
+
+    .badge-code {
+      display: inline-block;
+      background: #e2e8f0;
+      color: #1e293b;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .audit-card {
+      background: white;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .audit-card.unlock { border-left-color: var(--success); }
+    .audit-card.lock { border-left-color: var(--warning); }
+    .audit-card.note { border-left-color: #8b5cf6; }
+
+    .audit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+    .audit-text {
+      font-size: 0.9rem;
+      color: #1e293b;
+      font-weight: 500;
+    }
+
+    .perm-card {
+      background: white;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
     /* ─── Responsive ───────────────────────────────── */
     @media (max-width: 420px) {
       .summary-row { grid-template-columns: repeat(2, 1fr); }
@@ -565,14 +638,20 @@
 
   <!-- ═══════════ LOGIN ═══════════ -->
   <div class="login-screen" id="login-screen">
-    <div class="login-card">
+    <div class="login-card" style="max-width:440px;">
       <h1>🔒 Betreuer-Zugang</h1>
-      <p>Bitte PIN eingeben</p>
+      <p style="margin-bottom:12px;">Bitte Betreuer wählen und PIN eingeben</p>
+
+      <!-- Staff Selector Chips -->
+      <div id="staff-select-container" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px;">
+        <!-- Dynamically populated -->
+      </div>
+
       <div class="pin-fields" id="pin-fields">
-        <input type="number" inputmode="numeric" maxlength="1" autocomplete="off">
-        <input type="number" inputmode="numeric" maxlength="1" autocomplete="off">
-        <input type="number" inputmode="numeric" maxlength="1" autocomplete="off">
-        <input type="number" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" autocomplete="off">
       </div>
       <div class="pin-error-msg" id="pin-error"></div>
       <button class="btn-login" id="btn-login" onclick="checkPin()">Anmelden</button>
@@ -604,10 +683,14 @@
   <!-- ═══════════ DASHBOARD ═══════════ -->
   <div class="dashboard" id="dashboard">
     <div class="top-bar">
-      <h1 id="dashboard-title">📊 Betreuer Dashboard</h1>
-      <div class="top-bar-right">
+      <div>
+        <h1 id="dashboard-title" style="margin-bottom:2px;">📊 Betreuer Dashboard</h1>
+        <div id="current-staff-display" style="font-size:0.82rem; color:#e0f2fe; font-weight:600;"></div>
+      </div>
+      <div class="top-bar-right" style="display:flex; align-items:center; gap:8px;">
         <span class="last-refresh" id="last-refresh"></span>
-        <button class="btn-refresh" onclick="loadDashboard()">🔄 Aktualisieren</button>
+        <button class="btn-refresh" onclick="loadDashboard()">🔄</button>
+        <button class="btn-refresh" style="background:rgba(231,76,60,0.85); border:none; color:white; padding:6px 12px;" onclick="logoutStaff()">🚪 Abmelden</button>
       </div>
     </div>
 
@@ -616,6 +699,8 @@
       <button class="nav-tab active" onclick="switchTab('overview')">📊 Übersicht</button>
       <button class="nav-tab" onclick="switchTab('guides')">📋 Anleitungen</button>
       <button class="nav-tab" onclick="switchTab('custom-categories')">📚 Eigene Kategorien</button>
+      <button class="nav-tab" onclick="switchTab('permissions')">🔓 Freigaben</button>
+      <button class="nav-tab" onclick="switchTab('audit-log')">📝 Dokumentation</button>
       <button class="nav-tab" onclick="switchTab('settings')">⚙️ Einstellungen</button>
     </div>
 
@@ -698,7 +783,56 @@
         </div>
       </div>
 
-      <!-- ═══════════ TAB 4: EINSTELLUNGEN ═══════════ -->
+      <!-- ═══════════ TAB 4: FREIGABEN (Kategorien freischalten) ═══════════ -->
+      <div id="tab-permissions" class="tab-pane">
+        <div class="section-title" style="margin-top:16px;">🔓 Kategorien freischalten & sperren</div>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:14px;">
+          Bestimmen Sie, welche Kategorien für den Bewohner sichtbar sind (z. B. zur Reizreduktion schrittweise freischalten).
+          Jede Änderung wird im Dokumentations-Protokoll mit Ihrem Betreuer-Kürzel erfasst.
+        </p>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <button class="btn-action btn-action-secondary" style="font-size:0.85rem; padding:8px 14px;" onclick="bulkTogglePermissions(true)">
+            ✅ Alle freischalten
+          </button>
+          <button class="btn-action btn-action-secondary" style="font-size:0.85rem; padding:8px 14px;" onclick="bulkTogglePermissions(false)">
+            🔒 Alle sperren
+          </button>
+        </div>
+        <div id="category-permissions-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- ═══════════ TAB 5: DOKUMENTATION & AUDIT-LOG ═══════════ -->
+      <div id="tab-audit-log" class="tab-pane">
+        <div class="section-title" style="margin-top:16px;">📝 Dokumentations-Protokoll & Verlauf</div>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:14px;">
+          Lückenlose Aufzeichnung aller Aktionen (Kategorie-Freigaben, Anleitungen, Notizen) mit Zeitstempel und Betreuer-Kürzel.
+        </p>
+
+        <!-- Quick pedagogical note -->
+        <div class="category-card" style="margin-bottom:16px;">
+          <label style="font-weight:600; font-size:0.9rem; display:block; margin-bottom:6px;">✍️ Neue Betreuungs- / Verlaufsnotiz erfassen</label>
+          <textarea id="audit-note-text" class="form-textarea" rows="2" placeholder="z. B. Bewohner hat heute selbstständig den Küchendienst nach Bildanleitung durchgeführt..."></textarea>
+          <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+            <button class="btn-action" style="font-size:0.85rem; padding:8px 16px;" onclick="saveAuditNote()">
+              Notiz protokollieren
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div class="section-title" style="margin:0;">Protokoll-Einträge</div>
+          <button class="btn-action btn-action-secondary" style="font-size:0.8rem; padding:6px 12px;" onclick="exportAuditLogs()">
+            📋 Als Text kopieren
+          </button>
+        </div>
+        <div id="audit-log-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- ═══════════ TAB 6: EINSTELLUNGEN ═══════════ -->
       <div id="tab-settings" class="tab-pane">
         <div class="section-title" style="margin-top:16px;">Allgemein</div>
 
@@ -751,32 +885,18 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
           </div>
         </div>
 
-        <div class="section-title">🔒 Betreuer-PIN ändern</div>
+        <div class="section-title">👥 Betreuer-Accounts verwalten</div>
         <div class="category-card" style="margin-bottom:16px;">
-          <div style="font-size:0.85rem; color:#666; margin-bottom:12px;">
-            Ändern Sie die 4-stellige PIN für den geschützten Zugang zu diesem Betreuer-Dashboard.
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="font-size:0.85rem; color:#666;">
+              Legen Sie für jeden Betreuer ein eigenes Kürzel und eine persönliche PIN für den Zugang an.
+            </div>
+            <button class="btn-action" style="font-size:0.8rem; padding:6px 12px; white-space:nowrap;" onclick="openAddStaffModal()">
+              ➕ Neuer Betreuer
+            </button>
           </div>
-          <div style="display:flex; flex-direction:column; gap:10px;">
-            <div>
-              <label style="font-size:0.8rem; font-weight:600; color:#555; display:block; margin-bottom:4px;">Aktuelle PIN</label>
-              <input type="password" id="pin-current" inputmode="numeric" maxlength="4" placeholder="••••" class="form-input" style="letter-spacing:4px; font-size:1.1rem; width:100%;">
-            </div>
-            <div style="display:flex; gap:10px;">
-              <div style="flex:1;">
-                <label style="font-size:0.8rem; font-weight:600; color:#555; display:block; margin-bottom:4px;">Neue PIN (4 Ziffern)</label>
-                <input type="password" id="pin-new" inputmode="numeric" maxlength="4" placeholder="••••" class="form-input" style="letter-spacing:4px; font-size:1.1rem; width:100%;">
-              </div>
-              <div style="flex:1;">
-                <label style="font-size:0.8rem; font-weight:600; color:#555; display:block; margin-bottom:4px;">Wiederholen</label>
-                <input type="password" id="pin-repeat" inputmode="numeric" maxlength="4" placeholder="••••" class="form-input" style="letter-spacing:4px; font-size:1.1rem; width:100%;">
-              </div>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-              <div id="pin-change-status" style="font-size:0.85rem; font-weight:600;"></div>
-              <button class="btn-action" style="padding:8px 18px; font-size:0.85rem;" onclick="changeBetreuerPin()">
-                PIN speichern
-              </button>
-            </div>
+          <div id="staff-list-container">
+            <!-- Dynamically populated -->
           </div>
         </div>
 
@@ -790,6 +910,42 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ═══════════ MODAL: NEUER BETREUER ═══════════ -->
+  <div id="modal-add-staff" class="modal-overlay">
+    <div class="modal-card" style="max-width:440px;">
+      <div class="modal-header">
+        <h3>👥 Betreuer-Account</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-staff')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-staff-id">
+        <div class="form-group">
+          <label class="form-label">Name des Betreuers</label>
+          <input type="text" id="new-staff-name" placeholder="z. B. Frau Becker" class="form-input">
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label class="form-label">Kürzel (2–4 Zeichen)</label>
+            <input type="text" id="new-staff-code" placeholder="z. B. MB" maxlength="4" class="form-input" style="text-transform:uppercase; font-weight:700;">
+          </div>
+          <div style="flex:1;">
+            <label class="form-label">Persönliche PIN (4 Ziffern)</label>
+            <input type="password" id="new-staff-pin" placeholder="••••" maxlength="4" inputmode="numeric" class="form-input" style="letter-spacing:4px;">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+          <label class="form-label">Rolle / Funktion</label>
+          <input type="text" id="new-staff-role" placeholder="z. B. Bezugspädagoge, Schichtleitung" class="form-input">
+        </div>
+        <div id="add-staff-error" style="color:var(--danger); font-size:0.85rem; margin-top:8px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action btn-action-secondary" onclick="closeModal('modal-add-staff')">Abbrechen</button>
+        <button class="btn-action" onclick="saveStaffModal()">✓ Speichern</button>
+      </div>
     </div>
   </div>
 
@@ -934,35 +1090,76 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
   <script src="js/lessons.js"></script>
 
   <script>
-    let currentBetreuerPin = '1234';
+    // ═════════════════════════════════════════════════════════════════════════
+    // BETREUER-VERWALTUNG (MEHRERE LOGINS, KÜRZEL & PIN)
+    // ═════════════════════════════════════════════════════════════════════════
+    let staffList = [];
+    let currentStaff = null;
+    let selectedLoginStaff = null;
 
-    async function getBetreuerPin() {
-      // 1. Supabase Cloud Sync
+    async function fetchStaff() {
       if (window.SupaSync) {
-        const cloudPin = await SupaSync.get('betreuer_pin', null);
-        if (cloudPin && typeof cloudPin === 'string') {
-          currentBetreuerPin = cloudPin;
-          return cloudPin;
+        const cloudStaff = await SupaSync.get('staff', null);
+        if (cloudStaff && Array.isArray(cloudStaff) && cloudStaff.length > 0) {
+          staffList = cloudStaff;
+          return cloudStaff;
         }
       }
-      // 2. Local storage
-      const localPin = localStorage.getItem('betreuer_pin');
-      if (localPin) {
-        currentBetreuerPin = localPin;
-        return localPin;
-      }
-      // 3. Local server API
       try {
-        const res = await fetch('/api/settings');
+        const res = await fetch('/api/staff');
         if (res.ok) {
-          const data = await res.json();
-          if (data.betreuerPin) {
-            currentBetreuerPin = data.betreuerPin;
-            return data.betreuerPin;
-          }
+          staffList = await res.json();
+          return staffList;
         }
       } catch (e) {}
-      return currentBetreuerPin;
+
+      const local = localStorage.getItem('betreuer_staff');
+      if (local) {
+        try {
+          staffList = JSON.parse(local);
+          return staffList;
+        } catch (e) {}
+      }
+
+      staffList = [
+        { id: 'staff_primary', name: 'Hauptbetreuer', code: 'HB', pin: '1234', role: 'Bezugspädagoge', isPrimary: true }
+      ];
+      return staffList;
+    }
+
+    async function saveStaffList(list) {
+      staffList = list;
+      localStorage.setItem('betreuer_staff', JSON.stringify(list));
+      if (window.SupaSync) await SupaSync.set('staff', list);
+      try {
+        await fetch('/api/staff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(list)
+        });
+      } catch (e) {}
+    }
+
+    function renderLoginStaffSelector() {
+      const container = document.getElementById('staff-select-container');
+      if (!container) return;
+      container.innerHTML = '';
+      staffList.forEach((st, idx) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'staff-chip' + ((selectedLoginStaff && selectedLoginStaff.id === st.id) || (!selectedLoginStaff && idx === 0) ? ' active' : '');
+        chip.innerHTML = `<span class="badge-code">${st.code}</span> <span>${st.name}</span>`;
+        chip.onclick = () => {
+          selectedLoginStaff = st;
+          document.querySelectorAll('.staff-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const inputs = document.querySelectorAll('#pin-fields input');
+          inputs.forEach(i => i.value = '');
+          inputs[0].focus();
+        };
+        container.appendChild(chip);
+        if (!selectedLoginStaff && idx === 0) selectedLoginStaff = st;
+      });
     }
 
     function setupPinInputs() {
@@ -989,10 +1186,22 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       const inputs = document.querySelectorAll('#pin-fields input');
       const pin = Array.from(inputs).map(i => i.value).join('');
 
-      const validPin = await getBetreuerPin();
+      if (staffList.length === 0) await fetchStaff();
 
-      if (pin === validPin) {
+      let matchedStaff = null;
+      if (selectedLoginStaff && selectedLoginStaff.pin === pin) {
+        matchedStaff = selectedLoginStaff;
+      } else {
+        matchedStaff = staffList.find(s => s.pin === pin);
+      }
+
+      if (matchedStaff) {
+        currentStaff = matchedStaff;
+        sessionStorage.setItem('current_staff', JSON.stringify(matchedStaff));
         document.getElementById('login-screen').classList.add('hidden');
+        updateStaffBadge();
+
+        await addAuditLog('LOGIN', `Betreuer angemeldet: ${matchedStaff.name} [${matchedStaff.code}]`);
 
         const profile = await fetchProfile();
         if (!profile.facilityName) {
@@ -1009,50 +1218,395 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       }
     }
 
-    async function changeBetreuerPin() {
-      const currentInput = document.getElementById('pin-current').value.trim();
-      const newInput = document.getElementById('pin-new').value.trim();
-      const repeatInput = document.getElementById('pin-repeat').value.trim();
-      const statusEl = document.getElementById('pin-change-status');
+    function updateStaffBadge() {
+      const display = document.getElementById('current-staff-display');
+      if (display && currentStaff) {
+        display.innerHTML = `👤 <strong>${currentStaff.name}</strong> <span class="badge-code" style="background:rgba(255,255,255,0.25); color:white;">${currentStaff.code}</span>${currentStaff.role ? ' &middot; ' + currentStaff.role : ''}`;
+      }
+    }
 
-      const expectedPin = await getBetreuerPin();
+    async function logoutStaff() {
+      if (currentStaff) {
+        await addAuditLog('LOGOUT', `Betreuer abgemeldet: ${currentStaff.name} [${currentStaff.code}]`);
+      }
+      currentStaff = null;
+      sessionStorage.removeItem('current_staff');
+      document.getElementById('dashboard').classList.remove('active');
+      document.getElementById('login-screen').classList.remove('hidden');
+      renderLoginStaffSelector();
+      const inputs = document.querySelectorAll('#pin-fields input');
+      inputs.forEach(i => i.value = '');
+      document.getElementById('pin-error').textContent = '';
+      setTimeout(() => inputs[0].focus(), 200);
+    }
 
-      if (currentInput !== expectedPin) {
-        statusEl.innerHTML = '<span style="color:var(--danger)">❌ Aktuelle PIN ist falsch</span>';
-        return;
+    function renderStaffList() {
+      const container = document.getElementById('staff-list-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      staffList.forEach(st => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.justifyContent = 'space-between';
+        item.style.padding = '10px 0';
+        item.style.borderBottom = '1px solid #f0f0f0';
+        item.innerHTML = `
+          <div>
+            <div style="font-weight:700; font-size:0.95rem; display:flex; align-items:center; gap:8px;">
+              <span class="badge-code">${st.code}</span>
+              <span>${st.name}</span>
+              ${st.isPrimary ? '<span style="font-size:0.75rem; color:#64748b; font-weight:normal;">(Hauptbetreuer)</span>' : ''}
+            </div>
+            <div style="font-size:0.8rem; color:#7f8c8d; margin-top:2px;">
+              ${st.role || 'Betreuer'} &middot; PIN: <code>••••</code>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-action btn-action-secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="openAddStaffModal('${st.id}')">✏️ Bearbeiten</button>
+            ${!st.isPrimary && staffList.length > 1 ? `<button class="btn-action btn-action-secondary" style="font-size:0.75rem; padding:4px 8px; color:var(--danger);" onclick="deleteStaff('${st.id}')">🗑️</button>` : ''}
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function openAddStaffModal(staffId = null) {
+      document.getElementById('add-staff-error').textContent = '';
+      if (staffId) {
+        const st = staffList.find(s => s.id === staffId);
+        if (st) {
+          document.getElementById('edit-staff-id').value = st.id;
+          document.getElementById('new-staff-name').value = st.name;
+          document.getElementById('new-staff-code').value = st.code;
+          document.getElementById('new-staff-pin').value = st.pin;
+          document.getElementById('new-staff-role').value = st.role || '';
+        }
+      } else {
+        document.getElementById('edit-staff-id').value = '';
+        document.getElementById('new-staff-name').value = '';
+        document.getElementById('new-staff-code').value = '';
+        document.getElementById('new-staff-pin').value = '';
+        document.getElementById('new-staff-role').value = '';
+      }
+      openModal('modal-add-staff');
+    }
+
+    async function saveStaffModal() {
+      const editId = document.getElementById('edit-staff-id').value;
+      const name = document.getElementById('new-staff-name').value.trim();
+      const code = document.getElementById('new-staff-code').value.trim().toUpperCase();
+      const pin = document.getElementById('new-staff-pin').value.trim();
+      const role = document.getElementById('new-staff-role').value.trim();
+      const errEl = document.getElementById('add-staff-error');
+
+      if (!name) { errEl.textContent = 'Bitte Betreuer-Namen eingeben'; return; }
+      if (!code || code.length < 2 || code.length > 4) { errEl.textContent = 'Kürzel muss 2 bis 4 Buchstaben haben'; return; }
+      if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'PIN muss genau 4 Ziffern sein'; return; }
+
+      const existing = staffList.find(s => s.code === code && s.id !== editId);
+      if (existing) { errEl.textContent = `Kürzel [${code}] ist bereits für ${existing.name} vergeben`; return; }
+
+      if (editId) {
+        const idx = staffList.findIndex(s => s.id === editId);
+        if (idx !== -1) {
+          staffList[idx] = { ...staffList[idx], name, code, pin, role };
+          await addAuditLog('STAFF_EDIT', `Betreuer bearbeitet: ${name} [${code}]`);
+        }
+      } else {
+        const newStaff = {
+          id: 'staff_' + Date.now(),
+          name, code, pin, role,
+          createdAt: new Date().toISOString()
+        };
+        staffList.push(newStaff);
+        await addAuditLog('STAFF_CREATE', `Neuer Betreuer angelegt: ${name} [${code}] (${role})`);
       }
 
-      if (!/^\d{4}$/.test(newInput)) {
-        statusEl.innerHTML = '<span style="color:var(--danger)">❌ Neue PIN muss genau 4 Ziffern sein</span>';
+      await saveStaffList(staffList);
+      closeModal('modal-add-staff');
+      renderStaffList();
+      renderLoginStaffSelector();
+      if (currentStaff && currentStaff.id === editId) {
+        currentStaff = staffList.find(s => s.id === editId);
+        updateStaffBadge();
+      }
+    }
+
+    async function deleteStaff(staffId) {
+      if (staffList.length <= 1) {
+        alert('Es muss mindestens ein Betreuer hinterlegt sein.');
         return;
       }
+      const st = staffList.find(s => s.id === staffId);
+      if (!st) return;
+      if (!confirm(`Möchten Sie den Betreuer "${st.name}" wirklich löschen?`)) return;
 
-      if (newInput !== repeatInput) {
-        statusEl.innerHTML = '<span style="color:var(--danger)">❌ Neue PINs stimmen nicht überein</span>';
-        return;
-      }
+      staffList = staffList.filter(s => s.id !== staffId);
+      await saveStaffList(staffList);
+      await addAuditLog('STAFF_DELETE', `Betreuer gelöscht: ${st.name} [${st.code}]`);
+      renderStaffList();
+      renderLoginStaffSelector();
+    }
 
-      currentBetreuerPin = newInput;
-      localStorage.setItem('betreuer_pin', newInput);
+    // ═════════════════════════════════════════════════════════════════════════
+    // KATEGORIE-FREIGABEN (FREISCHALTEN / SPERREN)
+    // ═════════════════════════════════════════════════════════════════════════
+    let categoryPermissions = {};
 
+    async function fetchCategoryPermissions() {
       if (window.SupaSync) {
-        await SupaSync.set('betreuer_pin', newInput);
+        const cloudPerms = await SupaSync.get('category-permissions', null);
+        if (cloudPerms !== null) {
+          categoryPermissions = cloudPerms;
+          return cloudPerms;
+        }
       }
-
       try {
-        const s = await fetchSettings();
-        s.betreuerPin = newInput;
-        await saveSettings(s);
+        const res = await fetch('/api/category-permissions');
+        if (res.ok) {
+          categoryPermissions = await res.json();
+          return categoryPermissions;
+        }
       } catch (e) {}
 
-      document.getElementById('pin-current').value = '';
-      document.getElementById('pin-new').value = '';
-      document.getElementById('pin-repeat').value = '';
+      const local = localStorage.getItem('category_permissions');
+      if (local) {
+        try {
+          categoryPermissions = JSON.parse(local);
+          return categoryPermissions;
+        } catch (e) {}
+      }
+      categoryPermissions = {};
+      return categoryPermissions;
+    }
 
-      statusEl.innerHTML = '<span style="color:var(--success)">✅ PIN erfolgreich geändert!</span>';
-      setTimeout(() => {
-        if (statusEl.textContent.includes('erfolgreich')) statusEl.textContent = '';
-      }, 5000);
+    async function saveCategoryPermissions(perms) {
+      categoryPermissions = perms;
+      localStorage.setItem('category_permissions', JSON.stringify(perms));
+      if (window.SupaSync) await SupaSync.set('category-permissions', perms);
+      try {
+        await fetch('/api/category-permissions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(perms)
+        });
+      } catch (e) {}
+    }
+
+    async function renderPermissionsList() {
+      const container = document.getElementById('category-permissions-list');
+      if (!container) return;
+      container.innerHTML = '<div style="text-align:center; padding:16px; color:#999;">Lade Freigaben...</div>';
+
+      await fetchCategoryPermissions();
+      const customCats = await fetchCustomCategories();
+      const allCategories = [...CATEGORIES, ...customCats];
+
+      container.innerHTML = '';
+      allCategories.forEach(cat => {
+        const perm = categoryPermissions[cat.id];
+        const isUnlocked = perm === undefined ? true : (perm.unlocked !== false);
+        const updatedBy = perm?.updatedBy || '-';
+        const staffName = perm?.staffName ? ` (${perm.staffName})` : '';
+        const updatedAtStr = perm?.updatedAt ? new Date(perm.updatedAt).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+
+        const card = document.createElement('div');
+        card.className = 'perm-card';
+        card.innerHTML = `
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:2rem;">${cat.emoji}</span>
+            <div>
+              <div style="font-weight:700; font-size:1rem; color:#1e293b;">
+                ${cat.name || cat.id}
+              </div>
+              <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
+                ${isUnlocked ? '<span style="color:var(--success); font-weight:600;">● Freigeschaltet</span>' : '<span style="color:var(--danger); font-weight:600;">● Gesperrt (verborgen)</span>'}
+                ${perm ? ` &middot; Zuletzt von: <span class="badge-code">${updatedBy}</span>${staffName} am ${updatedAtStr}` : ''}
+              </div>
+            </div>
+          </div>
+          <label class="toggle" style="margin-left:12px;">
+            <input type="checkbox" ${isUnlocked ? 'checked' : ''} onchange="toggleCategoryPermission('${cat.id}', this.checked)">
+            <span class="toggle-track"></span>
+          </label>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function toggleCategoryPermission(catId, unlocked) {
+      await fetchCategoryPermissions();
+      const staffCode = currentStaff?.code || 'HB';
+      const staffName = currentStaff?.name || 'Betreuer';
+
+      categoryPermissions[catId] = {
+        unlocked,
+        updatedBy: staffCode,
+        staffName: staffName,
+        updatedAt: new Date().toISOString()
+      };
+      await saveCategoryPermissions(categoryPermissions);
+
+      const catName = CATEGORY_NAMES[catId] || catId;
+      const actionText = unlocked ? 'freigeschaltet' : 'gesperrt';
+      await addAuditLog(
+        unlocked ? 'CATEGORY_UNLOCK' : 'CATEGORY_LOCK',
+        `Kategorie "${catName}" ${actionText}`,
+        { categoryId: catId, unlocked }
+      );
+
+      renderPermissionsList();
+    }
+
+    async function bulkTogglePermissions(unlocked) {
+      await fetchCategoryPermissions();
+      const customCats = await fetchCustomCategories();
+      const allCategories = [...CATEGORIES, ...customCats];
+      const staffCode = currentStaff?.code || 'HB';
+      const staffName = currentStaff?.name || 'Betreuer';
+      const now = new Date().toISOString();
+
+      allCategories.forEach(cat => {
+        categoryPermissions[cat.id] = {
+          unlocked,
+          updatedBy: staffCode,
+          staffName: staffName,
+          updatedAt: now
+        };
+      });
+      await saveCategoryPermissions(categoryPermissions);
+
+      await addAuditLog(
+        unlocked ? 'BULK_UNLOCK' : 'BULK_LOCK',
+        `Alle Kategorien auf einmal ${unlocked ? 'freigeschaltet' : 'gesperrt'}`
+      );
+      renderPermissionsList();
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // DOKUMENTATIONS-PROTOKOLL & AUDIT-LOG
+    // ═════════════════════════════════════════════════════════════════════════
+    let auditLogs = [];
+
+    async function fetchAuditLogs() {
+      if (window.SupaSync) {
+        const cloudLogs = await SupaSync.get('audit_logs', null);
+        if (cloudLogs && Array.isArray(cloudLogs)) {
+          auditLogs = cloudLogs;
+          return cloudLogs;
+        }
+      }
+      try {
+        const res = await fetch('/api/audit-logs');
+        if (res.ok) {
+          auditLogs = await res.json();
+          return auditLogs;
+        }
+      } catch (e) {}
+
+      const local = localStorage.getItem('audit_logs');
+      if (local) {
+        try {
+          auditLogs = JSON.parse(local);
+          return auditLogs;
+        } catch (e) {}
+      }
+      return auditLogs;
+    }
+
+    async function saveAuditLogs(logs) {
+      auditLogs = logs;
+      localStorage.setItem('audit_logs', JSON.stringify(logs));
+      if (window.SupaSync) await SupaSync.set('audit_logs', logs);
+      try {
+        await fetch('/api/audit-logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(logs)
+        });
+      } catch (e) {}
+    }
+
+    async function addAuditLog(action, details, metadata = {}) {
+      const staffCode = currentStaff?.code || 'SYS';
+      const staffName = currentStaff?.name || 'System';
+      const entry = {
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(7),
+        timestamp: new Date().toISOString(),
+        staffCode,
+        staffName,
+        action,
+        details,
+        ...metadata
+      };
+      await fetchAuditLogs();
+      auditLogs.unshift(entry);
+      if (auditLogs.length > 500) auditLogs = auditLogs.slice(0, 500);
+      await saveAuditLogs(auditLogs);
+      return entry;
+    }
+
+    async function renderAuditLogs() {
+      const container = document.getElementById('audit-log-container');
+      if (!container) return;
+      container.innerHTML = '<div style="text-align:center; padding:16px; color:#999;">Lade Protokoll...</div>';
+
+      await fetchAuditLogs();
+      container.innerHTML = '';
+
+      if (auditLogs.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:24px; color:#999; font-size:0.9rem;">Noch keine Protokolleinträge vorhanden.</div>';
+        return;
+      }
+
+      auditLogs.forEach(log => {
+        const dateObj = new Date(log.timestamp);
+        const timeStr = dateObj.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        
+        let typeClass = '';
+        let icon = '📝';
+        if (log.action.includes('UNLOCK')) { typeClass = 'unlock'; icon = '🔓'; }
+        else if (log.action.includes('LOCK')) { typeClass = 'lock'; icon = '🔒'; }
+        else if (log.action.includes('NOTE') || log.action === 'CARE_NOTE') { typeClass = 'note'; icon = '✍️'; }
+        else if (log.action.includes('STAFF')) { icon = '👥'; }
+        else if (log.action.includes('GUIDE')) { icon = '📋'; }
+        else if (log.action.includes('CAT')) { icon = '📚'; }
+
+        const card = document.createElement('div');
+        card.className = 'audit-card ' + typeClass;
+        card.innerHTML = `
+          <div class="audit-header">
+            <span><span>${icon}</span> <strong class="badge-code">${log.staffCode || 'SYS'}</strong> ${log.staffName || ''}</span>
+            <span>${timeStr}</span>
+          </div>
+          <div class="audit-text">${log.details}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function saveAuditNote() {
+      const text = document.getElementById('audit-note-text').value.trim();
+      if (!text) { alert('Bitte einen Notiz-Text eingeben.'); return; }
+      await addAuditLog('CARE_NOTE', text);
+      document.getElementById('audit-note-text').value = '';
+      renderAuditLogs();
+    }
+
+    function exportAuditLogs() {
+      if (auditLogs.length === 0) { alert('Keine Einträge vorhanden.'); return; }
+      const text = auditLogs.map(l => {
+        const d = new Date(l.timestamp).toLocaleString('de-DE');
+        return `[${d}] [${l.staffCode}] ${l.staffName}: ${l.details}`;
+      }).join('\n');
+
+      navigator.clipboard?.writeText(text).then(() => {
+        alert('Protokoll in Zwischenablage kopiert! (' + auditLogs.length + ' Einträge)');
+      }).catch(() => {
+        alert(text);
+      });
     }
 
     // ─── Tabs ─────────────────────────────────────────────
@@ -1072,6 +1626,8 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
 
       if (tabId === 'guides') renderGuides();
       if (tabId === 'custom-categories') renderCustomCategories();
+      if (tabId === 'permissions') renderPermissionsList();
+      if (tabId === 'audit-log') renderAuditLogs();
       if (tabId === 'settings') loadSettingsTab();
     }
 
@@ -1158,15 +1714,24 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
 
     // ─── API Helper (Supabase Cloud + Local Server) ────────
     async function fetchProgress() {
+      let data = null;
       if (window.SupaSync) {
         const cloudProgress = await SupaSync.get('progress', null);
-        if (cloudProgress) return cloudProgress;
+        if (cloudProgress) data = cloudProgress;
       }
-      try {
-        const res = await fetch('/api/progress');
-        if (res.ok) return await res.json();
-      } catch (e) {}
-      return { words: {}, sentences: {}, quizScores: {}, totalSessions: 0, lastSessionDate: null };
+      if (!data) {
+        try {
+          const res = await fetch('/api/progress');
+          if (res.ok) data = await res.json();
+        } catch (e) {}
+      }
+      data = data || {};
+      data.words = data.words || {};
+      data.sentences = data.sentences || {};
+      data.quizScores = data.quizScores || {};
+      data.totalSessions = data.totalSessions || 0;
+      data.lastSessionDate = data.lastSessionDate || null;
+      return data;
     }
 
     async function saveProgress(progress) {
@@ -1302,6 +1867,9 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
 
     async function loadDashboard() {
       const progress = await fetchProgress();
+      progress.words = progress.words || {};
+      progress.sentences = progress.sentences || {};
+      progress.quizScores = progress.quizScores || {};
       const settings = await fetchSettings();
       const profile = await fetchProfile();
       const customCats = await fetchCustomCategories();
@@ -1477,8 +2045,12 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     async function deleteGuide(index) {
       if (!confirm('Möchten Sie diese Anleitung wirklich löschen?')) return;
       const guides = await fetchGuides();
+      const deletedGuide = guides[index];
       guides.splice(index, 1);
       await saveGuides(guides);
+      if (deletedGuide) {
+        await addAuditLog('GUIDE_DELETE', `Anleitung gelöscht: "${deletedGuide.title}"`);
+      }
       renderGuides();
     }
 
@@ -1534,6 +2106,7 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       const guides = await fetchGuides();
       guides.push(newGuide);
       await saveGuides(guides);
+      await addAuditLog('GUIDE_CREATE', `Anleitung erstellt (manuell): "${title}" (${steps.length} Schritte)`);
 
       closeModal('modal-manual-guide');
       renderGuides();
@@ -1726,6 +2299,7 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       const guides = await fetchGuides();
       guides.push(newGuide);
       await saveGuides(guides);
+      await addAuditLog('GUIDE_CREATE', `Anleitung erstellt (KI): "${title}" (${steps.length} Schritte)`);
 
       closeModal('modal-ai-guide');
       renderGuides();
@@ -1853,6 +2427,7 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       const cats = await fetchCustomCategories();
       cats.push(newCategory);
       await saveCustomCategories(cats);
+      await addAuditLog('CAT_CREATE', `Eigene Kategorie erstellt: "${name}" (${words.length} Wörter, ${sentences.length} Sätze)`);
 
       closeModal('modal-custom-category');
       renderCustomCategories();
@@ -1862,13 +2437,18 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     async function deleteCustomCategory(index) {
       if (!confirm('Möchten Sie diese Kategorie wirklich löschen?')) return;
       const cats = await fetchCustomCategories();
+      const deletedCat = cats[index];
       cats.splice(index, 1);
       await saveCustomCategories(cats);
+      if (deletedCat) {
+        await addAuditLog('CAT_DELETE', `Eigene Kategorie gelöscht: "${deletedCat.name}"`);
+      }
       renderCustomCategories();
     }
 
     // ─── Tab 4: Settings & API Key ────────────────────────
     async function loadSettingsTab() {
+      renderStaffList();
       const settings = await fetchSettings();
       document.getElementById('toggle-text').checked = settings.showText !== false;
 
@@ -1947,6 +2527,31 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       if (window.SupaSync) {
         await SupaSync.init();
       }
+      await fetchStaff();
+      renderLoginStaffSelector();
+
+      // Session restore if previously logged in
+      const savedStaff = sessionStorage.getItem('current_staff');
+      if (savedStaff) {
+        try {
+          const parsed = JSON.parse(savedStaff);
+          const exists = staffList.find(s => s.id === parsed.id);
+          if (exists) {
+            currentStaff = exists;
+            document.getElementById('login-screen').classList.add('hidden');
+            updateStaffBadge();
+            const profile = await fetchProfile();
+            if (!profile.facilityName) {
+              document.getElementById('setup-screen').classList.remove('hidden');
+              document.getElementById('setup-facility').focus();
+            } else {
+              document.getElementById('dashboard').classList.add('active');
+              loadDashboard();
+            }
+          }
+        } catch (e) {}
+      }
+
       setupPinInputs();
       startAutoRefresh();
     });

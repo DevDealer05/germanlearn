@@ -24,6 +24,21 @@ PROFILE_FILE = os.path.join(DATA_DIR, 'profile.json')
 GUIDES_FILE = os.path.join(DATA_DIR, 'guides.json')
 CUSTOM_CATEGORIES_FILE = os.path.join(DATA_DIR, 'custom_categories.json')
 CONFIG_FILE = os.path.join(DATA_DIR, 'config.json')
+STAFF_FILE = os.path.join(DATA_DIR, 'staff.json')
+CATEGORY_PERMISSIONS_FILE = os.path.join(DATA_DIR, 'category_permissions.json')
+AUDIT_LOGS_FILE = os.path.join(DATA_DIR, 'audit_logs.json')
+
+DEFAULT_STAFF = [
+    {
+        "id": "staff_primary",
+        "name": "Hauptbetreuer",
+        "code": "HB",
+        "pin": "1234",
+        "role": "Bezugspädagoge",
+        "isPrimary": True,
+        "createdAt": "2026-09-22T20:00:00Z"
+    }
+]
 
 # Ensure data directory exists
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -116,6 +131,18 @@ class AppHandler(SimpleHTTPRequestHandler):
             data = read_json(CONFIG_FILE, {})
             self._send_json(data)
 
+        elif parsed.path == '/api/staff':
+            data = read_json(STAFF_FILE, DEFAULT_STAFF)
+            self._send_json(data)
+
+        elif parsed.path == '/api/category-permissions':
+            data = read_json(CATEGORY_PERMISSIONS_FILE, {})
+            self._send_json(data)
+
+        elif parsed.path == '/api/audit-logs':
+            data = read_json(AUDIT_LOGS_FILE, [])
+            self._send_json(data)
+
         else:
             super().do_GET()
 
@@ -152,6 +179,18 @@ class AppHandler(SimpleHTTPRequestHandler):
 
         elif parsed.path == '/api/config':
             write_json(CONFIG_FILE, data)
+            self._send_json({'ok': True})
+
+        elif parsed.path == '/api/staff':
+            write_json(STAFF_FILE, data)
+            self._send_json({'ok': True})
+
+        elif parsed.path == '/api/category-permissions':
+            write_json(CATEGORY_PERMISSIONS_FILE, data)
+            self._send_json({'ok': True})
+
+        elif parsed.path == '/api/audit-logs':
+            write_json(AUDIT_LOGS_FILE, data)
             self._send_json({'ok': True})
 
         elif parsed.path == '/api/ai/generate-guide':
