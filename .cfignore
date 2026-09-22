@@ -1,6 +1,6 @@
 node_modules/
+tests/
+server.py
 package.json
 package-lock.json
-tests/
-.DS_Store
-*.log
+.git/
