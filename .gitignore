@@ -1,6 +1,13 @@
 node_modules/
 package.json
 package-lock.json
+wrangler.jsonc
+.wranglerignore
+.cfignore
 tests/
+functions/
+data/
+server.py
 .DS_Store
 *.log
+*.py
