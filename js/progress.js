@@ -251,3 +251,6 @@ const Progress = (() => {
     resetAll
   };
 })();
+
+window.Progress = Progress;
+

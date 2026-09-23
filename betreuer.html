@@ -620,6 +620,62 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sync-badge:hover { background: rgba(255, 255, 255, 0.28); }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .assessment-card {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .assessment-card:hover {
+      border-color: var(--primary);
+      background: #f0f7ff;
+      transform: translateY(-1px);
+    }
+    .assessment-card.selected {
+      border-color: var(--primary);
+      background: #e0f2fe;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+    .pulse { animation: pulse 1.5s infinite; }
+
     /* ─── Responsive ───────────────────────────────── */
     @media (max-width: 420px) {
       .summary-row { grid-template-columns: repeat(2, 1fr); }
@@ -685,11 +741,16 @@
     <div class="top-bar">
       <div>
         <h1 id="dashboard-title" style="margin-bottom:2px;">📊 Betreuer Dashboard</h1>
-        <div id="current-staff-display" style="font-size:0.82rem; color:#e0f2fe; font-weight:600;"></div>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+          <div id="current-staff-display" style="font-size:0.82rem; color:#e0f2fe; font-weight:600;"></div>
+          <div id="sync-status-badge" class="sync-badge" onclick="triggerManualSync()" title="Klicken für Sofort-Synchronisation mit Bewohner">
+            <span id="sync-icon">🟢</span> <span id="sync-text">Cloud Sync aktiv</span>
+          </div>
+        </div>
       </div>
       <div class="top-bar-right" style="display:flex; align-items:center; gap:8px;">
         <span class="last-refresh" id="last-refresh"></span>
-        <button class="btn-refresh" onclick="loadDashboard()">🔄</button>
+        <button class="btn-refresh" onclick="loadDashboard()" title="Aktualisieren">🔄</button>
         <button class="btn-refresh" style="background:rgba(231,76,60,0.85); border:none; color:white; padding:6px 12px;" onclick="logoutStaff()">🚪 Abmelden</button>
       </div>
     </div>
@@ -706,15 +767,28 @@
 
     <div class="dashboard-content">
 
-      <!-- Profile Info Card -->
-      <div id="profile-card" class="category-card" style="margin-top:16px; margin-bottom:16px; display:none;">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="font-size:2.5rem;">🏠</div>
-          <div style="flex:1;">
-            <div style="font-weight:700; font-size:1.05rem;" id="profile-facility"></div>
-            <div style="font-size:0.85rem; color:#7f8c8d;" id="profile-details"></div>
+      <!-- Profile Info Card (Bewohner-Konto) -->
+      <div id="profile-card" class="category-card" style="margin-top:16px; margin-bottom:16px; display:none; background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-left:4px solid var(--primary);">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <div style="font-size:2.6rem;">👤</div>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="font-weight:700; font-size:1.15rem; color:#1e293b;" id="profile-resident-header"></span>
+                <span id="profile-level-badge" class="badge-code" style="background:#e0f2fe; color:#0369a1;">Stufe 1</span>
+              </div>
+              <div style="font-size:0.85rem; color:#64748b; margin-top:2px;" id="profile-details"></div>
+              <div id="profile-tags" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;"></div>
+            </div>
           </div>
-          <button onclick="showEditProfile()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; padding:8px;">✏️</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <button class="btn-action" style="font-size:0.82rem; padding:6px 12px; background:#8b5cf6;" onclick="openAiAssessmentModal()" title="Ermittelt automatisch Niveau und empfohlene Freigaben">
+              🎯 KI-Einstufungstest
+            </button>
+            <button class="btn-action btn-action-secondary" style="font-size:0.82rem; padding:6px 12px;" onclick="openResidentAccountModal()">
+              ✏️ Bewohner-Konto
+            </button>
+          </div>
         </div>
       </div>
 
@@ -873,6 +947,14 @@
             Synchronisiert alle Daten (Fortschritt, Anleitungen, Kategorien) über das Internet in Echtzeit (auch über Mobilfunk/LTE).
           </div>
           <div id="supabase-status" style="font-size:0.85rem; font-weight:600; margin-bottom:12px;"></div>
+          <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+            <button class="btn-action btn-action-secondary" style="font-size:0.85rem; padding:8px 14px;" onclick="testCloudConnection()">
+              ⚡ Verbindung testen
+            </button>
+            <button class="btn-action btn-action-secondary" style="font-size:0.85rem; padding:8px 14px;" onclick="triggerManualSync()">
+              🔄 Sofort synchronisieren
+            </button>
+          </div>
           <div style="background:#f8f9fa; border-radius:10px; padding:12px; font-size:0.8rem; color:#555;">
             <strong>SQL für Supabase SQL-Editor (einmalig):</strong>
             <pre style="margin-top:6px; background:#fff; border:1px solid #e0e0e0; padding:8px; border-radius:6px; overflow-x:auto; font-size:0.75rem;">create table if not exists app_data (
@@ -900,9 +982,29 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
           </div>
         </div>
 
-        <div class="section-title">Profil & Daten</div>
-        <button class="btn-action btn-action-secondary" style="width:100%; margin-bottom:12px;" onclick="showEditProfile()">
-          ✏️ Einrichtungs-Profil bearbeiten
+        <div class="section-title">💾 Offline-Backup & Datensicherung</div>
+        <div class="category-card" style="margin-bottom:16px;">
+          <div style="font-size:0.85rem; color:#666; margin-bottom:12px;">
+            Erstellen Sie ein vollständiges Offline-Backup aller Daten (Bewohner, Betreuer, Freigaben, Anleitungen, Lernfortschritt, Dokumentations-Protokoll) oder stellen Sie eine frühere Datensicherung wieder her.
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn-action" style="font-size:0.85rem; padding:8px 14px;" onclick="downloadBackup()">
+              💾 Backup herunterladen (JSON)
+            </button>
+            <button class="btn-action btn-action-secondary" style="font-size:0.85rem; padding:8px 14px;" onclick="triggerRestoreBackup()">
+              📂 Backup wiederherstellen
+            </button>
+            <input type="file" id="backup-file-input" accept=".json" style="display:none;" onchange="handleRestoreBackup(event)">
+          </div>
+          <div id="backup-status" style="font-size:0.82rem; margin-top:8px;"></div>
+        </div>
+
+        <div class="section-title">👤 Bewohner-Konto & Daten</div>
+        <button class="btn-action btn-action-secondary" style="width:100%; margin-bottom:10px;" onclick="openResidentAccountModal()">
+          ✏️ Bewohner-Konto & Förderschwerpunkte bearbeiten
+        </button>
+        <button class="btn-action btn-action-secondary" style="width:100%; margin-bottom:12px;" onclick="openAiAssessmentModal()">
+          🎯 KI-Einstufungstest starten
         </button>
 
         <button class="btn-reset" onclick="resetProgress()">
@@ -910,6 +1012,160 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ═══════════ MODAL: BEWOHNER-KONTO VERWALTEN ═══════════ -->
+  <div id="modal-resident-account" class="modal-overlay">
+    <div class="modal-card" style="max-width:520px; text-align:left;">
+      <div class="modal-header">
+        <h3>👤 Bewohner-Konto & Förderschwerpunkte</h3>
+        <button class="modal-close" onclick="closeModal('modal-resident-account')">✕</button>
+      </div>
+      <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+        <div class="form-group">
+          <label class="form-label">Vollständiger Name des Bewohners *</label>
+          <input type="text" id="acc-resident-name" placeholder="z. B. Max Mustermann" class="form-input">
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label class="form-label">Rufname / Begrüßung</label>
+            <input type="text" id="acc-resident-nickname" placeholder="z. B. Max oder Herr Mustermann" class="form-input">
+          </div>
+          <div style="flex:1;">
+            <label class="form-label">Erstsprache / Muttersprache</label>
+            <select id="acc-native-language" class="form-input">
+              <option value="Deutsch">Deutsch</option>
+              <option value="Arabisch">Arabisch</option>
+              <option value="Ukrainisch">Ukrainisch</option>
+              <option value="Türkisch">Türkisch</option>
+              <option value="Farsi/Dari">Farsi / Dari</option>
+              <option value="Russisch">Russisch</option>
+              <option value="Polnisch">Polnisch</option>
+              <option value="Englisch">Englisch</option>
+              <option value="Sonstige">Sonstige</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <div style="flex:1;">
+            <label class="form-label">Einrichtung / Träger *</label>
+            <input type="text" id="acc-facility" placeholder="z. B. Haus Sonnenschein" class="form-input">
+          </div>
+          <div style="flex:1;">
+            <label class="form-label">Wohnbereich / Wohngruppe</label>
+            <input type="text" id="acc-ward" placeholder="z. B. Gruppe 2 / Erdgeschoss" class="form-input">
+          </div>
+        </div>
+
+        <div style="margin-top:16px; border-top:1px solid #e2e8f0; padding-top:12px;">
+          <label class="form-label" style="font-weight:700; color:#1e293b; margin-bottom:8px;">
+            🧩 Kognitives Profil & Förderschwerpunkte
+          </label>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.88rem; cursor:pointer;">
+              <input type="checkbox" id="acc-support-reizreduktion">
+              <span><strong>Reizreduktion</strong> (Schrittweise Kategorienfreigabe zur Entlastung bei Schizophrenie/Reizoffenheit)</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.88rem; cursor:pointer;">
+              <input type="checkbox" id="acc-support-visual">
+              <span><strong>Strikter Symbolfokus</strong> (Große Piktogramme & Audio als Primärkanal)</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.88rem; cursor:pointer;">
+              <input type="checkbox" id="acc-support-literacy">
+              <span><strong>Lese- und Schreibunterstützung</strong> (für Nichtleser/geringe Schriftkompetenz)</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.88rem; cursor:pointer;">
+              <input type="checkbox" id="acc-support-chores">
+              <span><strong>Alltagsautonomie</strong> (Fokus auf Handlungsabläufe & Wohndienste)</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-top:16px; border-top:1px solid #e2e8f0; padding-top:12px;">
+          <label class="form-label" style="font-weight:700; color:#1e293b; margin-bottom:8px;">
+            🎚️ App-Konfiguration für diesen Bewohner
+          </label>
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+              <label class="form-label">Lernstufe</label>
+              <select id="acc-proficiency-level" class="form-input">
+                <option value="1">Stufe 1 – Bild- & Wortebene</option>
+                <option value="2">Stufe 2 – Alltagsphrasen & Sätze</option>
+                <option value="3">Stufe 3 – Handlungsabläufe & Dienste</option>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <label class="form-label">Sprechtempo Audio</label>
+              <select id="acc-speech-rate" class="form-input">
+                <option value="0.75">Langsam (0.75x — Kognitionsgerecht)</option>
+                <option value="0.9">Leicht verlangsamt (0.9x)</option>
+                <option value="1.0">Normal (1.0x)</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:10px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.88rem; cursor:pointer;">
+              <input type="checkbox" id="acc-show-text">
+              <span>Text unter Symbolen anzeigen (Deaktivieren für reine Piktogramm-Führung)</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="acc-error-msg" style="color:var(--danger); font-size:0.85rem; margin-top:10px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action btn-action-secondary" onclick="closeModal('modal-resident-account')">Abbrechen</button>
+        <button class="btn-action" onclick="saveResidentAccount()">✓ Konto speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ MODAL: KI-EINSTUFUNGSTEST ═══════════ -->
+  <div id="modal-ai-assessment" class="modal-overlay">
+    <div class="modal-card" style="max-width:540px; text-align:left;">
+      <div class="modal-header">
+        <h3>🎯 KI-Einstufungstest (Lernstand ermitteln)</h3>
+        <button class="modal-close" onclick="closeModal('modal-ai-assessment')">✕</button>
+      </div>
+      <div class="modal-body" id="assessment-body">
+        <!-- Interactive Step by Step -->
+        <div id="assessment-question-container">
+          <!-- Dynamically populated questions 1 to 4 -->
+        </div>
+
+        <!-- Result container (shown after finishing) -->
+        <div id="assessment-result-container" style="display:none;">
+          <div style="text-align:center; padding:12px 0;">
+            <div style="font-size:2.8rem; margin-bottom:6px;">✨</div>
+            <h3 style="margin-bottom:4px;" id="result-title">Auswertung abgeschlossen</h3>
+            <div id="result-level-badge" style="font-size:0.95rem; font-weight:700; color:var(--primary); margin-bottom:12px;"></div>
+          </div>
+
+          <div style="background:#f8fafc; border-radius:10px; padding:14px; border:1px solid #e2e8f0; margin-bottom:14px;">
+            <div style="font-weight:700; font-size:0.9rem; color:#1e293b; margin-bottom:4px;">🤖 Pädagogische Einschätzung:</div>
+            <div id="result-summary" style="font-size:0.88rem; color:#475569; line-height:1.45;"></div>
+          </div>
+
+          <div style="background:#f0fdf4; border-radius:10px; padding:14px; border:1px solid #bbf7d0; margin-bottom:16px;">
+            <div style="font-weight:700; font-size:0.9rem; color:#166534; margin-bottom:4px;">🔓 Empfohlene Freigaben & Reizreduktion:</div>
+            <div id="result-recommendations" style="font-size:0.88rem; color:#15803d; line-height:1.45;"></div>
+          </div>
+
+          <button class="btn-action" style="width:100%; padding:12px;" onclick="applyAssessmentRecommendations()">
+            ✓ Empfohlene Freigaben jetzt anwenden
+          </button>
+        </div>
+
+        <div id="assessment-loading" style="display:none; text-align:center; padding:30px;">
+          <div style="font-size:2.5rem; margin-bottom:10px;" class="pulse">🤖</div>
+          <div style="font-weight:600; color:#1e293b;">Google Gemini analysiert die Antworten...</div>
+          <div style="font-size:0.82rem; color:#64748b; margin-top:4px;">Pädagogisches Profil und Freigabe-Empfehlungen werden berechnet.</div>
+        </div>
+      </div>
+      <div class="modal-footer" id="assessment-footer">
+        <button class="btn-action btn-action-secondary" onclick="closeModal('modal-ai-assessment')">Schließen</button>
+      </div>
     </div>
   </div>
 
@@ -1100,24 +1356,30 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     async function fetchStaff() {
       if (window.SupaSync) {
         const cloudStaff = await SupaSync.get('staff', null);
-        if (cloudStaff && Array.isArray(cloudStaff) && cloudStaff.length > 0) {
+        if (Array.isArray(cloudStaff) && cloudStaff.length > 0) {
           staffList = cloudStaff;
-          return cloudStaff;
+          return staffList;
         }
       }
       try {
         const res = await fetch('/api/staff');
         if (res.ok) {
-          staffList = await res.json();
-          return staffList;
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            staffList = data;
+            return staffList;
+          }
         }
       } catch (e) {}
 
       const local = localStorage.getItem('betreuer_staff');
       if (local) {
         try {
-          staffList = JSON.parse(local);
-          return staffList;
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            staffList = parsed;
+            return staffList;
+          }
         } catch (e) {}
       }
 
@@ -1204,7 +1466,8 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
         await addAuditLog('LOGIN', `Betreuer angemeldet: ${matchedStaff.name} [${matchedStaff.code}]`);
 
         const profile = await fetchProfile();
-        if (!profile.facilityName) {
+        const hasProfile = !!(profile.facilityName || profile.residentName);
+        if (!hasProfile) {
           document.getElementById('setup-screen').classList.remove('hidden');
           document.getElementById('setup-facility').focus();
         } else {
@@ -1358,7 +1621,7 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     async function fetchCategoryPermissions() {
       if (window.SupaSync) {
         const cloudPerms = await SupaSync.get('category-permissions', null);
-        if (cloudPerms !== null) {
+        if (cloudPerms && typeof cloudPerms === 'object' && !Array.isArray(cloudPerms)) {
           categoryPermissions = cloudPerms;
           return cloudPerms;
         }
@@ -1366,19 +1629,27 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       try {
         const res = await fetch('/api/category-permissions');
         if (res.ok) {
-          categoryPermissions = await res.json();
-          return categoryPermissions;
+          const data = await res.json();
+          if (data && typeof data === 'object' && !Array.isArray(data)) {
+            categoryPermissions = data;
+            return categoryPermissions;
+          }
         }
       } catch (e) {}
 
       const local = localStorage.getItem('category_permissions');
       if (local) {
         try {
-          categoryPermissions = JSON.parse(local);
-          return categoryPermissions;
+          const parsed = JSON.parse(local);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            categoryPermissions = parsed;
+            return categoryPermissions;
+          }
         } catch (e) {}
       }
-      categoryPermissions = {};
+      if (!categoryPermissions || typeof categoryPermissions !== 'object' || Array.isArray(categoryPermissions)) {
+        categoryPermissions = {};
+      }
       return categoryPermissions;
     }
 
@@ -1402,7 +1673,7 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
 
       await fetchCategoryPermissions();
       const customCats = await fetchCustomCategories();
-      const allCategories = [...CATEGORIES, ...customCats];
+      const allCategories = [...(CATEGORIES || []), ...(Array.isArray(customCats) ? customCats : [])];
 
       container.innerHTML = '';
       allCategories.forEach(cat => {
@@ -1463,7 +1734,7 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     async function bulkTogglePermissions(unlocked) {
       await fetchCategoryPermissions();
       const customCats = await fetchCustomCategories();
-      const allCategories = [...CATEGORIES, ...customCats];
+      const allCategories = [...(CATEGORIES || []), ...(Array.isArray(customCats) ? customCats : [])];
       const staffCode = currentStaff?.code || 'HB';
       const staffName = currentStaff?.name || 'Betreuer';
       const now = new Date().toISOString();
@@ -1501,18 +1772,25 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       try {
         const res = await fetch('/api/audit-logs');
         if (res.ok) {
-          auditLogs = await res.json();
-          return auditLogs;
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            auditLogs = data;
+            return auditLogs;
+          }
         }
       } catch (e) {}
 
       const local = localStorage.getItem('audit_logs');
       if (local) {
         try {
-          auditLogs = JSON.parse(local);
-          return auditLogs;
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed)) {
+            auditLogs = parsed;
+            return auditLogs;
+          }
         } catch (e) {}
       }
+      if (!Array.isArray(auditLogs)) auditLogs = [];
       return auditLogs;
     }
 
@@ -1635,22 +1913,28 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // ─── Profile ──────────────────────────────────────────
+    // ─── Profile & Resident Account ───────────────────────
+    let currentProfile = {};
+
     async function fetchProfile() {
+      let p = null;
       if (window.SupaSync) {
-        const cloudP = await SupaSync.get('profile', null);
-        if (cloudP && cloudP.facilityName) return cloudP;
+        p = await SupaSync.get('profile', null);
       }
-      try {
-        const res = await fetch('/api/profile');
-        if (res.ok) return await res.json();
-      } catch (e) {}
-      return {};
+      if (!p) {
+        try {
+          const res = await fetch('/api/profile');
+          if (res.ok) p = await res.json();
+        } catch (e) {}
+      }
+      currentProfile = p || {};
+      return currentProfile;
     }
 
     async function saveProfileData(data) {
+      currentProfile = data;
       if (window.SupaSync) {
-        SupaSync.set('profile', data);
+        await SupaSync.set('profile', data);
       }
       try {
         await fetch('/api/profile', {
@@ -1672,8 +1956,26 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
         return;
       }
 
-      const profile = { facilityName: facility, wardName: ward, caretakerName: caretaker, residentName: resident };
+      const profile = {
+        facilityName: facility,
+        wardName: ward,
+        caretakerName: caretaker,
+        residentName: resident,
+        residentNickname: resident,
+        nativeLanguage: 'Deutsch',
+        proficiencyLevel: 1,
+        speechRate: 0.75,
+        showText: true,
+        supportNeeds: {
+          reizreduktion: true,
+          visual: true,
+          literacy: false,
+          chores: true
+        }
+      };
+
       await saveProfileData(profile);
+      await addAuditLog('SETUP_COMPLETE', `Ersteinrichtung abgeschlossen für Bewohner: ${resident} (${facility})`);
 
       document.getElementById('setup-screen').classList.add('hidden');
       document.getElementById('dashboard').classList.add('active');
@@ -1681,35 +1983,453 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     }
 
     function showEditProfile() {
-      fetchProfile().then(profile => {
-        document.getElementById('setup-facility').value = profile.facilityName || '';
-        document.getElementById('setup-ward').value = profile.wardName || '';
-        document.getElementById('setup-caretaker').value = profile.caretakerName || '';
-        document.getElementById('setup-resident').value = profile.residentName || '';
-
-        document.getElementById('dashboard').classList.remove('active');
-        document.getElementById('setup-screen').classList.remove('hidden');
-      });
+      openResidentAccountModal();
     }
 
     function renderProfileCard(profile) {
       const card = document.getElementById('profile-card');
-      if (!profile.facilityName) {
+      if (!profile || (!profile.facilityName && !profile.residentName)) {
         card.style.display = 'none';
         return;
       }
       card.style.display = 'block';
-      document.getElementById('profile-facility').textContent = profile.facilityName;
+
+      const resName = profile.residentName || 'Bewohner';
+      const nick = profile.residentNickname && profile.residentNickname !== resName ? ` (${profile.residentNickname})` : '';
+      document.getElementById('profile-resident-header').textContent = resName + nick;
+
+      const level = profile.proficiencyLevel || 1;
+      const levelBadge = document.getElementById('profile-level-badge');
+      if (levelBadge) {
+        levelBadge.textContent = `Lernstufe ${level}`;
+      }
 
       const parts = [];
+      if (profile.facilityName) parts.push(profile.facilityName);
       if (profile.wardName) parts.push(profile.wardName);
-      if (profile.residentName) parts.push('Bewohner: ' + profile.residentName);
-      if (profile.caretakerName) parts.push('Betreuer: ' + profile.caretakerName);
+      if (profile.nativeLanguage) parts.push('Erstsprache: ' + profile.nativeLanguage);
       document.getElementById('profile-details').textContent = parts.join(' · ');
+
+      // Tags
+      const tagsContainer = document.getElementById('profile-tags');
+      if (tagsContainer) {
+        tagsContainer.innerHTML = '';
+        const sn = profile.supportNeeds || {};
+        if (sn.reizreduktion) {
+          tagsContainer.innerHTML += `<span class="badge-pill" style="background:#fef3c7; color:#92400e;">🕊️ Reizreduktion</span>`;
+        }
+        if (sn.visual) {
+          tagsContainer.innerHTML += `<span class="badge-pill" style="background:#e0f2fe; color:#0369a1;">👁️ Symbolfokus</span>`;
+        }
+        if (sn.chores) {
+          tagsContainer.innerHTML += `<span class="badge-pill" style="background:#f3e8ff; color:#6b21a8;">🧹 Alltagsautonomie</span>`;
+        }
+        if (profile.speechRate && parseFloat(profile.speechRate) <= 0.8) {
+          tagsContainer.innerHTML += `<span class="badge-pill" style="background:#ecfdf5; color:#047857;">🐢 Audio: Langsam</span>`;
+        }
+        if (profile.assessmentResult) {
+          tagsContainer.innerHTML += `<span class="badge-pill" style="background:#fdf2f8; color:#9d174d;">✨ KI-geprüft</span>`;
+        }
+      }
 
       if (profile.residentName) {
         document.getElementById('dashboard-title').textContent = `📊 ${profile.residentName} — Dashboard`;
       }
+    }
+
+    async function openResidentAccountModal() {
+      const p = await fetchProfile();
+      document.getElementById('acc-resident-name').value = p.residentName || '';
+      document.getElementById('acc-resident-nickname').value = p.residentNickname || '';
+      document.getElementById('acc-native-language').value = p.nativeLanguage || 'Deutsch';
+      document.getElementById('acc-facility').value = p.facilityName || '';
+      document.getElementById('acc-ward').value = p.wardName || '';
+      document.getElementById('acc-proficiency-level').value = p.proficiencyLevel || 1;
+      document.getElementById('acc-speech-rate').value = p.speechRate || '0.75';
+      document.getElementById('acc-show-text').checked = p.showText !== false;
+
+      const sn = p.supportNeeds || {};
+      document.getElementById('acc-support-reizreduktion').checked = sn.reizreduktion !== false;
+      document.getElementById('acc-support-visual').checked = sn.visual !== false;
+      document.getElementById('acc-support-literacy').checked = !!sn.literacy;
+      document.getElementById('acc-support-chores').checked = sn.chores !== false;
+
+      document.getElementById('acc-error-msg').textContent = '';
+      openModal('modal-resident-account');
+    }
+
+    async function saveResidentAccount() {
+      const name = document.getElementById('acc-resident-name').value.trim();
+      const facility = document.getElementById('acc-facility').value.trim();
+      const errEl = document.getElementById('acc-error-msg');
+
+      if (!name) { errEl.textContent = 'Bitte den Namen des Bewohners eingeben.'; return; }
+      if (!facility) { errEl.textContent = 'Bitte den Einrichtungsnamen eingeben.'; return; }
+
+      const updated = {
+        ...currentProfile,
+        residentName: name,
+        residentNickname: document.getElementById('acc-resident-nickname').value.trim() || name,
+        nativeLanguage: document.getElementById('acc-native-language').value,
+        facilityName: facility,
+        wardName: document.getElementById('acc-ward').value.trim(),
+        proficiencyLevel: parseInt(document.getElementById('acc-proficiency-level').value, 10) || 1,
+        speechRate: parseFloat(document.getElementById('acc-speech-rate').value) || 0.75,
+        showText: document.getElementById('acc-show-text').checked,
+        supportNeeds: {
+          reizreduktion: document.getElementById('acc-support-reizreduktion').checked,
+          visual: document.getElementById('acc-support-visual').checked,
+          literacy: document.getElementById('acc-support-literacy').checked,
+          chores: document.getElementById('acc-support-chores').checked
+        }
+      };
+
+      await saveProfileData(updated);
+      await addAuditLog('PROFILE_EDIT', `Bewohner-Konto aktualisiert für: ${name} [Stufe ${updated.proficiencyLevel}]`);
+
+      closeModal('modal-resident-account');
+      renderProfileCard(updated);
+      alert('✅ Bewohner-Konto erfolgreich gespeichert und synchronisiert!');
+    }
+
+    // ─── KI-EINSTUFUNGSTEST (Google Gemini) ────────────────
+    const ASSESSMENT_QUESTIONS = [
+      {
+        title: '1. Wort- & Symbolverständnis (Alltag)',
+        instruction: 'Aufgabe für den Bewohner: Höre zu und wähle das passende Bild.',
+        audioText: 'Wo ist das Reinigungsmittel?',
+        options: [
+          { id: 'clean', emoji: '🧴', label: 'Reinigungsmittel', correct: true },
+          { id: 'bed', emoji: '🛏️', label: 'Bett', correct: false },
+          { id: 'apple', emoji: '🍎', label: 'Apfel', correct: false }
+        ]
+      },
+      {
+        title: '2. Alltagsbedürfnisse & Wohlbefinden',
+        instruction: 'Situation: Der Bewohner hat Durst. Welches Bild passt?',
+        audioText: 'Ich habe Durst.',
+        options: [
+          { id: 'water', emoji: '🥛', label: 'Wasser / Trinken', correct: true },
+          { id: 'broom', emoji: '🧹', label: 'Besen', correct: false },
+          { id: 'key', emoji: '🔑', label: 'Schlüssel', correct: false }
+        ]
+      },
+      {
+        title: '3. Schmerz- & Befindlichkeitsäußerung',
+        instruction: 'Situation: Dem Bewohner tut etwas weh. Welches Symbol signalisiert Schmerz?',
+        audioText: 'Ich habe Schmerzen.',
+        options: [
+          { id: 'hurt', emoji: '🤕', label: 'Schmerzen / Aua', correct: true },
+          { id: 'ball', emoji: '⚽', label: 'Ball', correct: false },
+          { id: 'music', emoji: '🎵', label: 'Musik', correct: false }
+        ]
+      },
+      {
+        title: '4. Handlungsablauf Wohnbereich',
+        instruction: 'Situation: Der Tisch im Gemeinschaftsraum ist schmutzig. Was tun wir?',
+        audioText: 'Der Tisch muss abgewischt werden.',
+        options: [
+          { id: 'sponge', emoji: '🧽', label: 'Tisch abwischen', correct: true },
+          { id: 'shoes', emoji: '👟', label: 'Schuhe anziehen', correct: false },
+          { id: 'sleep', emoji: '🌙', label: 'Schlafen gehen', correct: false }
+        ]
+      }
+    ];
+
+    let currentAssessmentStep = 0;
+    let assessmentUserAnswers = [];
+    let pendingAiRecommendations = null;
+
+    function openAiAssessmentModal() {
+      currentAssessmentStep = 0;
+      assessmentUserAnswers = [];
+      pendingAiRecommendations = null;
+
+      document.getElementById('assessment-question-container').style.display = 'block';
+      document.getElementById('assessment-result-container').style.display = 'none';
+      document.getElementById('assessment-loading').style.display = 'none';
+
+      renderAssessmentQuestion(0);
+      openModal('modal-ai-assessment');
+    }
+
+    function renderAssessmentQuestion(stepIdx) {
+      const q = ASSESSMENT_QUESTIONS[stepIdx];
+      const container = document.getElementById('assessment-question-container');
+      if (!container || !q) return;
+
+      container.innerHTML = `
+        <div style="margin-bottom:14px;">
+          <div style="font-size:0.8rem; font-weight:700; color:var(--primary); text-transform:uppercase;">
+            Frage ${stepIdx + 1} von ${ASSESSMENT_QUESTIONS.length}
+          </div>
+          <h4 style="margin:4px 0 6px 0; font-size:1.1rem; color:#1e293b;">${q.title}</h4>
+          <p style="font-size:0.85rem; color:#64748b; margin-bottom:12px;">${q.instruction}</p>
+          <div style="background:#f1f5f9; padding:10px 14px; border-radius:10px; display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <span style="font-size:0.95rem; font-weight:600; color:#1e293b;">🔊 „${q.audioText}“</span>
+            <button type="button" class="btn-action btn-action-secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="playAssessmentAudio('${q.audioText}')">Anhören</button>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          ${q.options.map((opt, oIdx) => `
+            <div class="assessment-card" id="opt-card-${oIdx}" onclick="selectAssessmentChoice(${stepIdx}, ${oIdx})">
+              <span style="font-size:2rem;">${opt.emoji}</span>
+              <div style="font-weight:700; font-size:1rem; color:#1e293b;">${opt.label}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function playAssessmentAudio(text) {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'de-DE';
+        u.rate = 0.75;
+        window.speechSynthesis.speak(u);
+      }
+    }
+
+    function selectAssessmentChoice(stepIdx, optionIdx) {
+      const q = ASSESSMENT_QUESTIONS[stepIdx];
+      const opt = q.options[optionIdx];
+      assessmentUserAnswers[stepIdx] = {
+        questionId: q.id,
+        title: q.title,
+        chosen: opt.label,
+        emoji: opt.emoji,
+        isCorrect: opt.correct
+      };
+
+      document.querySelectorAll('.assessment-card').forEach(c => c.classList.remove('selected'));
+      const card = document.getElementById(`opt-card-${optionIdx}`);
+      if (card) card.classList.add('selected');
+
+      setTimeout(() => {
+        if (stepIdx < ASSESSMENT_QUESTIONS.length - 1) {
+          currentAssessmentStep++;
+          renderAssessmentQuestion(currentAssessmentStep);
+        } else {
+          runAiAssessmentEvaluation();
+        }
+      }, 350);
+    }
+
+    async function runAiAssessmentEvaluation() {
+      document.getElementById('assessment-question-container').style.display = 'none';
+      document.getElementById('assessment-loading').style.display = 'block';
+
+      const correctCount = assessmentUserAnswers.filter(a => a.isCorrect).length;
+      const resName = currentProfile.residentName || 'Der Bewohner';
+
+      const promptText = `Du bist ein erfahrener Sozialpädagoge in der Behindertenhilfe und Sozialpsychiatrie.
+Ein Bewohner (${resName}) hat einen kognitiven Einstufungstest für Deutsch und Alltagsführung absolviert.
+Ergebnis: ${correctCount} von 4 Aufgaben korrekt gelöst.
+Aufgaben-Details:
+${assessmentUserAnswers.map((a, i) => `${i+1}. ${a.title}: ${a.isCorrect ? 'RICHTIG' : 'FALSCH (wählte ' + a.chosen + ')'}`).join('\n')}
+
+Erstelle eine kognitionssensible, wertschätzende pädagogische Einstufung.
+Antworte AUSSCHLIESSLICH im folgenden JSON-Format ohne Markdown:
+{
+  "level": ${correctCount <= 2 ? 1 : (correctCount === 3 ? 2 : 3)},
+  "levelTitle": "${correctCount <= 2 ? 'Stufe 1 (Bild- & Symbolorientierter Grundwortschatz)' : (correctCount === 3 ? 'Stufe 2 (Alltagsphrasen & Grundbedürfnisse)' : 'Stufe 3 (Erweiterte Alltagsautonomie & Dienste)')}",
+  "summary": "2-3 kurze Sätze zur kognitiven Stärke und Förderempfehlung für Betreuer.",
+  "recommendedUnlock": ${correctCount <= 2 ? '["greeting", "food", "feelings", "daily"]' : '["greeting", "food", "feelings", "daily", "hygiene", "chores"]'},
+  "recommendedLock": ${correctCount <= 2 ? '["numbers", "travel", "time", "sentences", "activities"]' : '["numbers", "travel"]'},
+  "reizreduktionTip": "Konkreter Tipp zur Vermeidung von Reizüberflutung bei diesem Bewohner."
+}`;
+
+      try {
+        let aiResult = null;
+        const cfg = await fetchConfig();
+        const key = cfg.geminiApiKey || 'AQ.Ab8RN6JhpjDBh_RP138UTkDHmJtMMBZ0fNOaizBLBH3iHutUDg';
+
+        if (key) {
+          const directRes = await callGeminiDirect(key, promptText, null).catch(() => null);
+          if (directRes && directRes.guide) {
+            aiResult = directRes.guide;
+          }
+        }
+
+        // Fallback calculation if Gemini API not reachable
+        if (!aiResult || !aiResult.level) {
+          aiResult = {
+            level: correctCount <= 2 ? 1 : (correctCount === 3 ? 2 : 3),
+            levelTitle: correctCount <= 2 ? 'Stufe 1 (Bild- & Symbolorientierter Grundwortschatz)' : (correctCount === 3 ? 'Stufe 2 (Alltagsphrasen & Grundbedürfnisse)' : 'Stufe 3 (Erweiterte Alltagsautonomie & Dienste)'),
+            summary: `${resName} zeigt eine gute visuelle Orientierung (${correctCount}/4 Aufgaben erfolgreich). Zur Vermeidung von Reizüberflutung sollten vorerst die wichtigsten Basiskategorien fokussiert werden.`,
+            recommendedUnlock: correctCount <= 2 ? ['greeting', 'food', 'feelings', 'daily'] : ['greeting', 'food', 'feelings', 'daily', 'hygiene', 'chores'],
+            recommendedLock: correctCount <= 2 ? ['numbers', 'travel', 'time', 'sentences', 'activities'] : ['numbers', 'travel'],
+            reizreduktionTip: 'Schrittweise Freischaltung: Erst neue Kategorien öffnen, wenn der Basiswortschatz gefestigt ist.'
+          };
+        }
+
+        pendingAiRecommendations = aiResult;
+
+        document.getElementById('assessment-loading').style.display = 'none';
+        document.getElementById('assessment-result-container').style.display = 'block';
+
+        document.getElementById('result-title').textContent = `${correctCount} von 4 Aufgaben gelöst`;
+        document.getElementById('result-level-badge').textContent = `🎯 ${aiResult.levelTitle}`;
+        document.getElementById('result-summary').textContent = aiResult.summary;
+        document.getElementById('result-recommendations').innerHTML = `
+          <div><strong>Freischalten:</strong> ${(aiResult.recommendedUnlock || []).map(id => CATEGORY_NAMES[id] || id).join(', ')}</div>
+          <div style="margin-top:4px;"><strong>Sperren (Reizreduktion):</strong> ${(aiResult.recommendedLock || []).map(id => CATEGORY_NAMES[id] || id).join(', ')}</div>
+          <div style="margin-top:6px; font-style:italic; color:#047857;">💡 ${aiResult.reizreduktionTip}</div>
+        `;
+
+      } catch (err) {
+        document.getElementById('assessment-loading').style.display = 'none';
+        document.getElementById('assessment-question-container').style.display = 'block';
+        alert('Fehler bei der Auswertung: ' + err.message);
+      }
+    }
+
+    async function applyAssessmentRecommendations() {
+      if (!pendingAiRecommendations) return;
+      const rec = pendingAiRecommendations;
+      const staffCode = currentStaff?.code || 'HB';
+      const staffName = currentStaff?.name || 'Betreuer';
+      const now = new Date().toISOString();
+
+      await fetchCategoryPermissions();
+
+      // Apply unlocks
+      (rec.recommendedUnlock || []).forEach(catId => {
+        categoryPermissions[catId] = { unlocked: true, updatedBy: staffCode, staffName, updatedAt: now };
+      });
+
+      // Apply locks
+      (rec.recommendedLock || []).forEach(catId => {
+        categoryPermissions[catId] = { unlocked: false, updatedBy: staffCode, staffName, updatedAt: now };
+      });
+
+      await saveCategoryPermissions(categoryPermissions);
+
+      // Update profile
+      currentProfile.proficiencyLevel = rec.level;
+      currentProfile.assessmentResult = {
+        date: now,
+        level: rec.level,
+        levelTitle: rec.levelTitle,
+        evaluatedBy: staffCode
+      };
+      if (rec.level === 1) {
+        currentProfile.speechRate = 0.75;
+      }
+      await saveProfileData(currentProfile);
+
+      await addAuditLog('ASSESSMENT_APPLIED', `KI-Einstufungstest angewendet: ${rec.levelTitle}. Freigaben zur Reizreduktion angepasst.`);
+
+      closeModal('modal-ai-assessment');
+      renderProfileCard(currentProfile);
+      renderPermissionsList();
+      alert('✅ Empfehlungen wurden erfolgreich angewendet!\n\nDie angepassten Freigaben sind ab sofort live auf dem Bewohner-Gerät aktiv.');
+    }
+
+    // ─── Backup & Sync Diagnostic Functions ───────────────
+    function downloadBackup() {
+      try {
+        const backup = SupaSync.exportBackup();
+        const jsonStr = JSON.stringify(backup, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const d = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `deutsch-lernen-backup-${d}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        addAuditLog('BACKUP_EXPORT', `Vollständiges Offline-Backup heruntergeladen`);
+      } catch (e) {
+        alert('Fehler beim Backup-Export: ' + e.message);
+      }
+    }
+
+    function triggerRestoreBackup() {
+      document.getElementById('backup-file-input').click();
+    }
+
+    async function handleRestoreBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (!confirm(`Möchten Sie wirklich die Sicherungsdatei "${file.name}" wiederherstellen?\nAlle aktuellen lokalen Daten werden aktualisiert.`)) {
+        event.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          await SupaSync.importBackup(parsed);
+          await addAuditLog('BACKUP_IMPORT', `Backup wiederhergestellt aus Datei: ${file.name}`);
+          alert('✅ Datensicherung erfolgreich wiederhergestellt und synchronisiert!');
+          location.reload();
+        } catch (err) {
+          alert('Fehler beim Wiederherstellen: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    async function testCloudConnection() {
+      const statusEl = document.getElementById('supabase-status');
+      if (statusEl) statusEl.innerHTML = `<span>⏳ Prüfe Verbindung...</span>`;
+
+      const result = await SupaSync.testConnection();
+      if (statusEl) {
+        if (result.ok) {
+          statusEl.innerHTML = `<span style="color:var(--success)">✅ Verbindung aktiv! Ping: ${result.latencyMs} ms · Supabase Cloud erreichbar</span>`;
+        } else {
+          statusEl.innerHTML = `<span style="color:var(--danger)">⚠️ Verbindungsfehler: ${result.error}</span>`;
+        }
+      }
+      return result;
+    }
+
+    async function triggerManualSync() {
+      const badge = document.getElementById('sync-status-badge');
+      if (badge) {
+        badge.innerHTML = `<span>🔄</span> <span>Synchronisiere...</span>`;
+      }
+      await SupaSync.flushQueue();
+      await SupaSync.syncAllFromCloud();
+      await loadDashboard();
+      if (badge) {
+        badge.innerHTML = `<span>🟢</span> <span>Synchronisiert</span>`;
+      }
+    }
+
+    function setupSyncBadge() {
+      if (!window.SupaSync) return;
+      SupaSync.onStatusChange((status, info) => {
+        const badge = document.getElementById('sync-status-badge');
+        const iconEl = document.getElementById('sync-icon');
+        const textEl = document.getElementById('sync-text');
+        if (!badge || !iconEl || !textEl) return;
+
+        if (status === 'synced') {
+          iconEl.textContent = '🟢';
+          textEl.textContent = 'Cloud Sync aktiv';
+          badge.style.background = 'rgba(46, 204, 113, 0.25)';
+        } else if (status === 'syncing') {
+          iconEl.textContent = '🔄';
+          textEl.textContent = info.queueLength ? `Sync (${info.queueLength})` : 'Synchronisiere...';
+          badge.style.background = 'rgba(241, 196, 15, 0.3)';
+        } else if (status === 'offline') {
+          iconEl.textContent = '⚪';
+          textEl.textContent = 'Offline (Gesichert)';
+          badge.style.background = 'rgba(149, 165, 166, 0.3)';
+        } else if (status === 'error') {
+          iconEl.textContent = '⚠️';
+          textEl.textContent = 'Sync Fehler';
+          badge.style.background = 'rgba(231, 76, 60, 0.3)';
+        }
+      });
     }
 
     // ─── API Helper (Supabase Cloud + Local Server) ────────
@@ -1803,11 +2523,14 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     async function fetchGuides() {
       if (window.SupaSync) {
         const cloudGuides = await SupaSync.get('guides', null);
-        if (cloudGuides && cloudGuides.length > 0) return cloudGuides;
+        if (cloudGuides && Array.isArray(cloudGuides) && cloudGuides.length > 0) return cloudGuides;
       }
       try {
         const res = await fetch('/api/guides');
-        if (res.ok) return await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) return data;
+        }
       } catch (e) {}
       return [];
     }
@@ -1828,11 +2551,14 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     async function fetchCustomCategories() {
       if (window.SupaSync) {
         const cloudCats = await SupaSync.get('custom-categories', null);
-        if (cloudCats !== null) return cloudCats;
+        if (cloudCats && Array.isArray(cloudCats)) return cloudCats;
       }
       try {
         const res = await fetch('/api/custom-categories');
-        if (res.ok) return await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) return data;
+        }
       } catch (e) {}
       return [];
     }
@@ -2468,9 +3194,10 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
       const supaStatusEl = document.getElementById('supabase-status');
       if (supaStatusEl) {
         if (window.SupaSync && SupaSync.isReady) {
-          supaStatusEl.innerHTML = `<span style="color:var(--success)">✅ Supabase Cloud aktiv (https://tujzmaqtatlvmwzjcdlk.supabase.co)</span>`;
+          const st = SupaSync.getStatus();
+          supaStatusEl.innerHTML = `<span style="color:var(--success)">✅ Supabase Cloud aktiv (https://tujzmaqtatlvmwzjcdlk.supabase.co) &middot; Status: <strong>${st.status}</strong> (${st.queueLength} ausstehend)</span>`;
         } else {
-          supaStatusEl.innerHTML = `<span style="color:var(--warning)">ℹ️ Supabase bereit</span>`;
+          supaStatusEl.innerHTML = `<span style="color:var(--warning)">ℹ️ Supabase bereit (Offline-Modus aktiv)</span>`;
         }
       }
     }
@@ -2526,6 +3253,7 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
     document.addEventListener('DOMContentLoaded', async () => {
       if (window.SupaSync) {
         await SupaSync.init();
+        setupSyncBadge();
       }
       await fetchStaff();
       renderLoginStaffSelector();
@@ -2541,7 +3269,8 @@ create policy "Allow all" on app_data for all using (true) with check (true);</p
             document.getElementById('login-screen').classList.add('hidden');
             updateStaffBadge();
             const profile = await fetchProfile();
-            if (!profile.facilityName) {
+            const hasProfile = !!(profile.facilityName || profile.residentName);
+            if (!hasProfile) {
               document.getElementById('setup-screen').classList.remove('hidden');
               document.getElementById('setup-facility').focus();
             } else {

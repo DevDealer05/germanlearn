@@ -14,7 +14,7 @@ const App = (() => {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const screen = document.getElementById(screenId);
     if (screen) screen.classList.add('active');
-    Audio.stop();
+    if (typeof Audio !== 'undefined' && typeof Audio.stop === 'function') Audio.stop();
   }
 
   function goHome() {
@@ -119,9 +119,9 @@ const App = (() => {
         SupaSync.get('guides', null),
         SupaSync.get('category-permissions', null)
       ]);
-      if (cloudCats !== null) customCategories = cloudCats;
-      if (cloudGuides !== null) guides = cloudGuides;
-      if (cloudPerms !== null) categoryPermissions = cloudPerms;
+      if (cloudCats !== null && Array.isArray(cloudCats)) customCategories = cloudCats;
+      if (cloudGuides !== null && Array.isArray(cloudGuides)) guides = cloudGuides;
+      if (cloudPerms !== null && typeof cloudPerms === 'object' && !Array.isArray(cloudPerms)) categoryPermissions = cloudPerms;
     }
 
     // 2. Fallback to local server / localStorage
@@ -131,28 +131,41 @@ const App = (() => {
         fetch('/api/guides'),
         fetch('/api/category-permissions')
       ]);
-      if (catRes.ok && customCategories.length === 0) customCategories = await catRes.json();
-      if (guideRes.ok && guides.length === 0) guides = await guideRes.json();
-      if (permRes.ok && Object.keys(categoryPermissions).length === 0) categoryPermissions = await permRes.json();
+      if (catRes.ok && customCategories.length === 0) {
+        const d = await catRes.json();
+        if (Array.isArray(d)) customCategories = d;
+      }
+      if (guideRes.ok && guides.length === 0) {
+        const d = await guideRes.json();
+        if (Array.isArray(d)) guides = d;
+      }
+      if (permRes.ok && Object.keys(categoryPermissions).length === 0) {
+        const d = await permRes.json();
+        if (d && typeof d === 'object' && !Array.isArray(d)) categoryPermissions = d;
+      }
     } catch (e) {}
 
     if (Object.keys(categoryPermissions).length === 0) {
       try {
         const storedPerms = localStorage.getItem('category_permissions');
-        if (storedPerms) categoryPermissions = JSON.parse(storedPerms);
+        if (storedPerms) {
+          const parsed = JSON.parse(storedPerms);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) categoryPermissions = parsed;
+        }
       } catch (e) {}
     }
   }
 
   function getAllCategories() {
     // Merge built-in + custom categories
-    const custom = customCategories.map(c => ({
+    const validCustom = Array.isArray(customCategories) ? customCategories : [];
+    const custom = validCustom.map(c => ({
       ...c,
       color: c.color || '#888',
       words: c.words || [],
       sentences: c.sentences || []
     }));
-    return [...CATEGORIES, ...custom];
+    return [...(CATEGORIES || []), ...custom];
   }
 
   function renderHome() {
@@ -831,23 +844,37 @@ const App = (() => {
   let profile = {};
 
   async function fetchProfile() {
-    // 1. Try Supabase cloud first
+    // 1. Try Supabase cloud / local storage first via SupaSync
     if (window.SupaSync) {
-      const cloudProfile = await SupaSync.get('profile', null);
-      if (cloudProfile && cloudProfile.residentName) return cloudProfile;
+      const p = await SupaSync.get('profile', null);
+      if (p && (p.residentName || p.residentNickname)) return p;
     }
-    // 2. Fallback to local server
+    // 2. Fallback to localStorage
+    try {
+      const stored = localStorage.getItem('profile');
+      if (stored) {
+        const p = JSON.parse(stored);
+        if (p && (p.residentName || p.residentNickname)) return p;
+      }
+    } catch (e) {}
+    // 3. Fallback to local server
     try {
       const res = await fetch('/api/profile');
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const p = await res.json();
+        if (p && (p.residentName || p.residentNickname)) return p;
+      }
     } catch (e) {}
     return {};
   }
 
   async function saveProfile(data) {
     if (window.SupaSync) {
-      SupaSync.set('profile', data);
+      await SupaSync.set('profile', data);
     }
+    try {
+      localStorage.setItem('profile', JSON.stringify(data));
+    } catch (e) {}
     try {
       await fetch('/api/profile', {
         method: 'POST',
@@ -860,13 +887,19 @@ const App = (() => {
   function applyProfile() {
     const greeting = document.getElementById('home-greeting');
     const title = document.getElementById('home-title');
+    const displayName = profile.residentNickname || profile.residentName;
 
-    if (profile.residentName) {
-      greeting.textContent = `Hallo, ${profile.residentName}!`;
-      title.textContent = `📖 ${profile.residentName}`;
+    if (displayName) {
+      greeting.textContent = `Hallo, ${displayName}!`;
+      title.textContent = `📖 ${displayName}`;
     } else {
       greeting.textContent = '';
       title.textContent = '📖 Deutsch Lernen';
+    }
+
+    // Apply custom speech rate from profile
+    if (profile.speechRate && window.Audio && typeof Audio.setRate === 'function') {
+      Audio.setRate(parseFloat(profile.speechRate));
     }
   }
 
@@ -878,6 +911,7 @@ const App = (() => {
       return;
     }
     profile.residentName = name;
+    profile.residentNickname = name;
     await saveProfile(profile);
     applyProfile();
     goHome();
@@ -887,6 +921,23 @@ const App = (() => {
   async function init() {
     if (window.SupaSync) {
       await SupaSync.init();
+
+      // Listen for sync status to show subtle icon in header
+      SupaSync.onStatusChange((status) => {
+        const el = document.getElementById('home-sync-status');
+        if (!el) return;
+        if (status === 'synced') {
+          el.textContent = '☁️';
+          el.title = 'Mit Betreuer-Cloud synchronisiert';
+        } else if (status === 'syncing') {
+          el.textContent = '🔄';
+          el.title = 'Synchronisiere...';
+        } else if (status === 'offline') {
+          el.textContent = '💾';
+          el.title = 'Offline (Lokal gesichert)';
+        }
+      });
+
       // Setup realtime subscriptions so changes from caretaker phone update instantly
       SupaSync.subscribe('guides', (newGuides) => {
         guides = newGuides;
@@ -914,7 +965,7 @@ const App = (() => {
     // Load profile
     profile = await fetchProfile();
 
-    if (!profile.residentName) {
+    if (!profile.residentName && !profile.residentNickname) {
       showScreen('screen-setup');
       setTimeout(() => document.getElementById('setup-name').focus(), 300);
     } else {
@@ -934,5 +985,8 @@ const App = (() => {
   };
 })();
 
+window.App = App;
+
 // Start the app when DOM is ready
 document.addEventListener('DOMContentLoaded', App.init);
+

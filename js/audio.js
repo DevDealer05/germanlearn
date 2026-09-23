@@ -6,6 +6,11 @@ const Audio = (() => {
   let synth = window.speechSynthesis;
   let germanVoice = null;
   let isPlaying = false;
+  let currentRate = 0.75;
+
+  function setRate(r) {
+    if (r && !isNaN(r)) currentRate = Math.max(0.5, Math.min(1.5, parseFloat(r)));
+  }
 
   // Find the best German voice
   function findGermanVoice() {
@@ -34,7 +39,7 @@ const Audio = (() => {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'de-DE';
-    utterance.rate = 0.75; // Langsam sprechen — sehr wichtig!
+    utterance.rate = currentRate; // Kognitionsgerecht anpassbar
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
@@ -108,5 +113,5 @@ const Audio = (() => {
     }
   }
 
-  return { init, speak, stop, playSuccessSound, playTryAgainSound, get isPlaying() { return isPlaying; } };
+  return { init, speak, stop, setRate, playSuccessSound, playTryAgainSound, get isPlaying() { return isPlaying; } };
 })();
