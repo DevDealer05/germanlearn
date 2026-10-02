@@ -1,0 +1,708 @@
+{
+  "config": {
+    "argv": [
+      "/usr/local/share/nvm/versions/node/v24.21.0/bin/node",
+      "/workspaces/germanlearn/node_modules/.bin/playwright",
+      "test",
+      "--reporter=json"
+    ],
+    "configFile": "/workspaces/germanlearn/playwright.config.ts",
+    "rootDir": "/workspaces/germanlearn/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/workspaces/germanlearn/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/workspaces/germanlearn/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 35000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npx http-server . -p 8080 -c-1",
+      "url": "http://127.0.0.1:8080/index.html",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "auth.spec.ts",
+      "file": "auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Authentifizierung & PWA Ersteinrichtung",
+          "file": "auth.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Mitarbeiter PWA: Abweisung bei falscher PIN",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 35000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 572,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T16:46:36.601Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/workspaces/germanlearn/test-results/auth-Authentifizierung-PWA-a7bd4--Abweisung-bei-falscher-PIN-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-e5e52235935668604503",
+              "file": "auth.spec.ts",
+              "line": 6,
+              "column": 7
+            },
+            {
+              "title": "Mitarbeiter PWA: PIN-Login (1234) & Abmeldung",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 35000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1142,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T16:46:37.327Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/workspaces/germanlearn/test-results/auth-Authentifizierung-PWA-7863b-WA-PIN-Login-1234-Abmeldung-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-6d00260964e0da6eb47e",
+              "file": "auth.spec.ts",
+              "line": 22,
+              "column": 7
+            },
+            {
+              "title": "Bewohner PWA: Setup mit Name & Begrüßung",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 35000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 639,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T16:46:38.543Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/workspaces/germanlearn/test-results/auth-Authentifizierung-PWA-5099f-WA-Setup-mit-Name-Begrüßung-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-27735a833b407bef02e3",
+              "file": "auth.spec.ts",
+              "line": 34,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "caretaker.spec.ts",
+      "file": "caretaker.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Mitarbeiter PWA: Betreuer-Dashboard Workflows",
+          "file": "caretaker.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Navigation durch alle Betreuer-Tabs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 35000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1803,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T16:46:39.220Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/workspaces/germanlearn/test-results/caretaker-Mitarbeiter-PWA--1f196-on-durch-alle-Betreuer-Tabs-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "81a2fe0b861570fbd3b7-35ee014c93614f6ba4a5",
+              "file": "caretaker.spec.ts",
+              "line": 11,
+              "column": 7
+            },
+            {
+              "title": "Dokumentation / Audit-Log: Automatische Protokollierung bei Pflege-Notiz",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 35000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11955,
+                      "error": {
+                        "message": "TimeoutError: locator.fill: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#care-note-input')\u001b[22m\n",
+                        "stack": "TimeoutError: locator.fill: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#care-note-input')\u001b[22m\n\n    at /workspaces/germanlearn/tests/caretaker.spec.ts:37:21",
+                        "location": {
+                          "file": "/workspaces/germanlearn/tests/caretaker.spec.ts",
+                          "column": 21,
+                          "line": 37
+                        },
+                        "snippet": "  35 |     const noteInput = page.locator('#care-note-input');\n  36 |     const testNote = 'Bewohner hat heute selbstständig den Küchendienst begonnen.';\n> 37 |     await noteInput.fill(testNote);\n     |                     ^\n  38 |     await page.click('button:has-text(\"Notiz speichern\")');\n  39 |\n  40 |     const logList = page.locator('#audit-log-list');"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workspaces/germanlearn/tests/caretaker.spec.ts",
+                            "column": 21,
+                            "line": 37
+                          },
+                          "message": "TimeoutError: locator.fill: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#care-note-input')\u001b[22m\n\n\n  35 |     const noteInput = page.locator('#care-note-input');\n  36 |     const testNote = 'Bewohner hat heute selbstständig den Küchendienst begonnen.';\n> 37 |     await noteInput.fill(testNote);\n     |                     ^\n  38 |     await page.click('button:has-text(\"Notiz speichern\")');\n  39 |\n  40 |     const logList = page.locator('#audit-log-list');\n    at /workspaces/germanlearn/tests/caretaker.spec.ts:37:21"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T16:46:41.126Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspaces/germanlearn/test-results/caretaker-Mitarbeiter-PWA--53372-kollierung-bei-Pflege-Notiz-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspaces/germanlearn/test-results/caretaker-Mitarbeiter-PWA--53372-kollierung-bei-Pflege-Notiz-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workspaces/germanlearn/test-results/caretaker-Mitarbeiter-PWA--53372-kollierung-bei-Pflege-Notiz-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/workspaces/germanlearn/test-results/caretaker-Mitarbeiter-PWA--53372-kollierung-bei-Pflege-Notiz-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workspaces/germanlearn/tests/caretaker.spec.ts",
+                        "column": 21,
+                        "line": 37
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "81a2fe0b861570fbd3b7-aeaa7de9d2e1c039b8d5",
+              "file": "caretaker.spec.ts",
+              "line": 31,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "resident.spec.ts",
+      "file": "resident.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Bewohner PWA: Autonome Lern- & Quiz-Workflows",
+          "file": "resident.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Lernmodus: Wörter durchblättern & Audio testen",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 35000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 9254,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#category-grid .category-card:has-text(\"Küche & Essen\")')\nExpected: visible\nTimeout: 8000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#category-grid .category-card:has-text(\"Küche & Essen\")') with timeout 8000ms\u001b[22m\n\u001b[2m  - waiting for locator('#category-grid .category-card:has-text(\"Küche & Essen\")')\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#category-grid .category-card:has-text(\"Küche & Essen\")')\nExpected: visible\nTimeout: 8000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#category-grid .category-card:has-text(\"Küche & Essen\")') with timeout 8000ms\u001b[22m\n\u001b[2m  - waiting for locator('#category-grid .category-card:has-text(\"Küche & Essen\")')\u001b[22m\n\n    at /workspaces/germanlearn/tests/resident.spec.ts:12:32",
+                        "location": {
+                          "file": "/workspaces/germanlearn/tests/resident.spec.ts",
+                          "column": 32,
+                          "line": 12
+                        },
+                        "snippet": "  10 |   test('Lernmodus: Wörter durchblättern & Audio testen', async ({ page }) => {\n  11 |     const categoryCard = page.locator('#category-grid .category-card:has-text(\"Küche & Essen\")');\n> 12 |     await expect(categoryCard).toBeVisible();\n     |                                ^\n  13 |     await categoryCard.click();\n  14 |\n  15 |     await expect(page.locator('#screen-category')).toBeVisible();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workspaces/germanlearn/tests/resident.spec.ts",
+                            "column": 32,
+                            "line": 12
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#category-grid .category-card:has-text(\"Küche & Essen\")')\nExpected: visible\nTimeout: 8000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#category-grid .category-card:has-text(\"Küche & Essen\")') with timeout 8000ms\u001b[22m\n\u001b[2m  - waiting for locator('#category-grid .category-card:has-text(\"Küche & Essen\")')\u001b[22m\n\n\n  10 |   test('Lernmodus: Wörter durchblättern & Audio testen', async ({ page }) => {\n  11 |     const categoryCard = page.locator('#category-grid .category-card:has-text(\"Küche & Essen\")');\n> 12 |     await expect(categoryCard).toBeVisible();\n     |                                ^\n  13 |     await categoryCard.click();\n  14 |\n  15 |     await expect(page.locator('#screen-category')).toBeVisible();\n    at /workspaces/germanlearn/tests/resident.spec.ts:12:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T16:46:53.646Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspaces/germanlearn/test-results/resident-Bewohner-PWA-Auto-87755--durchblättern-Audio-testen-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspaces/germanlearn/test-results/resident-Bewohner-PWA-Auto-87755--durchblättern-Audio-testen-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workspaces/germanlearn/test-results/resident-Bewohner-PWA-Auto-87755--durchblättern-Audio-testen-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/workspaces/germanlearn/test-results/resident-Bewohner-PWA-Auto-87755--durchblättern-Audio-testen-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workspaces/germanlearn/tests/resident.spec.ts",
+                        "column": 32,
+                        "line": 12
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4a6db2b65275cdd9e9f8-cc7865aa8afbced99eb9",
+              "file": "resident.spec.ts",
+              "line": 10,
+              "column": 7
+            },
+            {
+              "title": "Sanftes Quiz: Fragen beantworten & Replay nutzen",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 35000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 813,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#mode-buttons button:has-text(\"Quiz\")')\nExpected: visible\nError: strict mode violation: locator('#mode-buttons button:has-text(\"Quiz\")') resolved to 2 elements:\n    1) <button class=\"mode-btn\" onclick=\"App.goToQuiz()\">…</button> aka getByRole('button', { name: '🎯 Wörter-Quiz →' })\n    2) <button class=\"mode-btn\" onclick=\"App.goToSentenceQuiz()\">…</button> aka getByRole('button', { name: '🧩 Satz-Quiz →' })\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#mode-buttons button:has-text(\"Quiz\")') with timeout 8000ms\u001b[22m\n\u001b[2m  - waiting for locator('#mode-buttons button:has-text(\"Quiz\")')\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#mode-buttons button:has-text(\"Quiz\")')\nExpected: visible\nError: strict mode violation: locator('#mode-buttons button:has-text(\"Quiz\")') resolved to 2 elements:\n    1) <button class=\"mode-btn\" onclick=\"App.goToQuiz()\">…</button> aka getByRole('button', { name: '🎯 Wörter-Quiz →' })\n    2) <button class=\"mode-btn\" onclick=\"App.goToSentenceQuiz()\">…</button> aka getByRole('button', { name: '🧩 Satz-Quiz →' })\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#mode-buttons button:has-text(\"Quiz\")') with timeout 8000ms\u001b[22m\n\u001b[2m  - waiting for locator('#mode-buttons button:has-text(\"Quiz\")')\u001b[22m\n\n    at /workspaces/germanlearn/tests/resident.spec.ts:41:27",
+                        "location": {
+                          "file": "/workspaces/germanlearn/tests/resident.spec.ts",
+                          "column": 27,
+                          "line": 41
+                        },
+                        "snippet": "  39 |\n  40 |     const quizBtn = page.locator('#mode-buttons button:has-text(\"Quiz\")');\n> 41 |     await expect(quizBtn).toBeVisible();\n     |                           ^\n  42 |     await quizBtn.click();\n  43 |\n  44 |     await expect(page.locator('#screen-quiz')).toBeVisible();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workspaces/germanlearn/tests/resident.spec.ts",
+                            "column": 27,
+                            "line": 41
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#mode-buttons button:has-text(\"Quiz\")')\nExpected: visible\nError: strict mode violation: locator('#mode-buttons button:has-text(\"Quiz\")') resolved to 2 elements:\n    1) <button class=\"mode-btn\" onclick=\"App.goToQuiz()\">…</button> aka getByRole('button', { name: '🎯 Wörter-Quiz →' })\n    2) <button class=\"mode-btn\" onclick=\"App.goToSentenceQuiz()\">…</button> aka getByRole('button', { name: '🧩 Satz-Quiz →' })\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#mode-buttons button:has-text(\"Quiz\")') with timeout 8000ms\u001b[22m\n\u001b[2m  - waiting for locator('#mode-buttons button:has-text(\"Quiz\")')\u001b[22m\n\n\n  39 |\n  40 |     const quizBtn = page.locator('#mode-buttons button:has-text(\"Quiz\")');\n> 41 |     await expect(quizBtn).toBeVisible();\n     |                           ^\n  42 |     await quizBtn.click();\n  43 |\n  44 |     await expect(page.locator('#screen-quiz')).toBeVisible();\n    at /workspaces/germanlearn/tests/resident.spec.ts:41:27"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T16:47:03.510Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspaces/germanlearn/test-results/resident-Bewohner-PWA-Auto-cfe3f-n-beantworten-Replay-nutzen-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspaces/germanlearn/test-results/resident-Bewohner-PWA-Auto-cfe3f-n-beantworten-Replay-nutzen-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workspaces/germanlearn/test-results/resident-Bewohner-PWA-Auto-cfe3f-n-beantworten-Replay-nutzen-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/workspaces/germanlearn/test-results/resident-Bewohner-PWA-Auto-cfe3f-n-beantworten-Replay-nutzen-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workspaces/germanlearn/tests/resident.spec.ts",
+                        "column": 27,
+                        "line": 41
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4a6db2b65275cdd9e9f8-a47b77adf57268481608",
+              "file": "resident.spec.ts",
+              "line": 35,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "sync.spec.ts",
+      "file": "sync.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Cross-App Realtime Sync (Mitarbeiter PWA ↔ Bewohner PWA)",
+          "file": "sync.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Sync-Workflow 1: Mitarbeiter erstellt Dienstplan-Anleitung → Bewohner sieht & nutzt sie live",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 35000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 8904,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#category-grid .category-card:has-text(\"Anleitungen\")')\nExpected: visible\nTimeout: 6000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#category-grid .category-card:has-text(\"Anleitungen\")') with timeout 6000ms\u001b[22m\n\u001b[2m  - waiting for locator('#category-grid .category-card:has-text(\"Anleitungen\")')\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#category-grid .category-card:has-text(\"Anleitungen\")')\nExpected: visible\nTimeout: 6000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#category-grid .category-card:has-text(\"Anleitungen\")') with timeout 6000ms\u001b[22m\n\u001b[2m  - waiting for locator('#category-grid .category-card:has-text(\"Anleitungen\")')\u001b[22m\n\n    at /workspaces/germanlearn/tests/sync.spec.ts:39:43",
+                        "location": {
+                          "file": "/workspaces/germanlearn/tests/sync.spec.ts",
+                          "column": 43,
+                          "line": 39
+                        },
+                        "snippet": "  37 |\n  38 |     // Live-Synchronisation im Bewohner-Fenster\n> 39 |     await expect(guideCardOnResidentHome).toBeVisible({ timeout: 6000 });\n     |                                           ^\n  40 |     await guideCardOnResidentHome.click();\n  41 |     await expect(residentPage.locator('#screen-guides-list')).toBeVisible();\n  42 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workspaces/germanlearn/tests/sync.spec.ts",
+                            "column": 43,
+                            "line": 39
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#category-grid .category-card:has-text(\"Anleitungen\")')\nExpected: visible\nTimeout: 6000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#category-grid .category-card:has-text(\"Anleitungen\")') with timeout 6000ms\u001b[22m\n\u001b[2m  - waiting for locator('#category-grid .category-card:has-text(\"Anleitungen\")')\u001b[22m\n\n\n  37 |\n  38 |     // Live-Synchronisation im Bewohner-Fenster\n> 39 |     await expect(guideCardOnResidentHome).toBeVisible({ timeout: 6000 });\n     |                                           ^\n  40 |     await guideCardOnResidentHome.click();\n  41 |     await expect(residentPage.locator('#screen-guides-list')).toBeVisible();\n  42 |\n    at /workspaces/germanlearn/tests/sync.spec.ts:39:43"
+                        },
+                        {
+                          "message": "Error: apiRequestContext._wrapApiCall: ENOENT: no such file or directory, copyfile '/workspaces/germanlearn/test-results/.playwright-artifacts-3/traces/0cc518b4e81cfdbffc61-cefc326287992de3757b-recording1.network' -> '/workspaces/germanlearn/test-results/.playwright-artifacts-3/traces/0cc518b4e81cfdbffc61-cefc326287992de3757b-recording1-pwnetcopy-1.network'"
+                        },
+                        {
+                          "message": "Error: browserContext._wrapApiCall: ENOENT: no such file or directory, open '/workspaces/germanlearn/test-results/.playwright-artifacts-3/traces/0cc518b4e81cfdbffc61-cefc326287992de3757b.trace'"
+                        },
+                        {
+                          "message": "Error: ENOENT: no such file or directory, open '/workspaces/germanlearn/test-results/.playwright-artifacts-3/ed13a9893b6af4dc58d108e3218ceceb.zip'"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T16:47:04.998Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspaces/germanlearn/test-results/sync-Cross-App-Realtime-Sy-4bc7b-wohner-sieht-nutzt-sie-live-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspaces/germanlearn/test-results/sync-Cross-App-Realtime-Sy-4bc7b-wohner-sieht-nutzt-sie-live-chromium/test-failed-2.png"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workspaces/germanlearn/tests/sync.spec.ts",
+                        "column": 43,
+                        "line": 39
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0cc518b4e81cfdbffc61-cefc326287992de3757b",
+              "file": "sync.spec.ts",
+              "line": 6,
+              "column": 7
+            },
+            {
+              "title": "Sync-Workflow 2: Mitarbeiter sperrt Kategorie → Bewohner-Ansicht blendet sie sofort aus",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 35000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 9535,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#category-grid .category-card:has-text(\"Kleidung\")')\nExpected: visible\nTimeout: 8000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#category-grid .category-card:has-text(\"Kleidung\")') with timeout 8000ms\u001b[22m\n\u001b[2m  - waiting for locator('#category-grid .category-card:has-text(\"Kleidung\")')\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#category-grid .category-card:has-text(\"Kleidung\")')\nExpected: visible\nTimeout: 8000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#category-grid .category-card:has-text(\"Kleidung\")') with timeout 8000ms\u001b[22m\n\u001b[2m  - waiting for locator('#category-grid .category-card:has-text(\"Kleidung\")')\u001b[22m\n\n    at /workspaces/germanlearn/tests/sync.spec.ts:81:32",
+                        "location": {
+                          "file": "/workspaces/germanlearn/tests/sync.spec.ts",
+                          "column": 32,
+                          "line": 81
+                        },
+                        "snippet": "  79 |     await ensureResidentHome(residentPage, TEST_PROFILE.residentName);\n  80 |     const clothingCard = residentPage.locator('#category-grid .category-card:has-text(\"Kleidung\")');\n> 81 |     await expect(clothingCard).toBeVisible();\n     |                                ^\n  82 |\n  83 |     await loginCaretaker(caretakerPage, '1234');\n  84 |     await caretakerPage.click('button.nav-tab:has-text(\"Freigaben\")');"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workspaces/germanlearn/tests/sync.spec.ts",
+                            "column": 32,
+                            "line": 81
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#category-grid .category-card:has-text(\"Kleidung\")')\nExpected: visible\nTimeout: 8000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#category-grid .category-card:has-text(\"Kleidung\")') with timeout 8000ms\u001b[22m\n\u001b[2m  - waiting for locator('#category-grid .category-card:has-text(\"Kleidung\")')\u001b[22m\n\n\n  79 |     await ensureResidentHome(residentPage, TEST_PROFILE.residentName);\n  80 |     const clothingCard = residentPage.locator('#category-grid .category-card:has-text(\"Kleidung\")');\n> 81 |     await expect(clothingCard).toBeVisible();\n     |                                ^\n  82 |\n  83 |     await loginCaretaker(caretakerPage, '1234');\n  84 |     await caretakerPage.click('button.nav-tab:has-text(\"Freigaben\")');\n    at /workspaces/germanlearn/tests/sync.spec.ts:81:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T16:47:14.644Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspaces/germanlearn/test-results/sync-Cross-App-Realtime-Sy-c1373-icht-blendet-sie-sofort-aus-chromium/test-failed-2.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspaces/germanlearn/test-results/sync-Cross-App-Realtime-Sy-c1373-icht-blendet-sie-sofort-aus-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspaces/germanlearn/test-results/sync-Cross-App-Realtime-Sy-c1373-icht-blendet-sie-sofort-aus-chromium/video-1.webm"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspaces/germanlearn/test-results/sync-Cross-App-Realtime-Sy-c1373-icht-blendet-sie-sofort-aus-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workspaces/germanlearn/test-results/sync-Cross-App-Realtime-Sy-c1373-icht-blendet-sie-sofort-aus-chromium/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/workspaces/germanlearn/test-results/sync-Cross-App-Realtime-Sy-c1373-icht-blendet-sie-sofort-aus-chromium/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workspaces/germanlearn/tests/sync.spec.ts",
+                        "column": 32,
+                        "line": 81
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0cc518b4e81cfdbffc61-67ae06bd261c5392fb20",
+              "file": "sync.spec.ts",
+              "line": 72,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-02T16:46:36.034Z",
+    "duration": 48373.662,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 5,
+    "flaky": 0
+  }
+}
